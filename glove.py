@@ -53,6 +53,7 @@ print(
 
 position = 7
 vx = 0
+dT = 0.066
 while True:
     # Update
     switch1.update()
