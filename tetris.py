@@ -149,25 +149,25 @@ class Application(tk.Frame):
 analog_in = AnalogIn(board.A5)
 
 # Set up the on-off toggle
-StartToggle = False     # off
+PowerResetToggle = False     # off
 
 # Set up the digital pin we are using
-start_stop_pin = digitalio.DigitalInOut(board.D5)
-start_stop_pin.direction = digitalio.Direction.INPUT
-start_stop_pin.pull = digitalio.Pull.UP
-start_stop_button = Debouncer(start_stop_pin)
+power_reset_pin = digitalio.DigitalInOut(board.D5)
+power_reset_pin.direction = digitalio.Direction.INPUT
+power_reset_pin.pull = digitalio.Pull.UP
+power_reset_button = Debouncer(power_reset_pin)
 
 
-def start_stop():
+def power_reset():
 
-    global NeoToggle
+    global PowerResetToggle
 
     # button to turn on/off lights
-    start_stop_button.update()
-    if start_stop_button.fell:
-        StartToggle = not StartToggle
+    power_reset_button.update()
+    if power_reset_button.fell:
+        PowerResetToggle = not PowerResetToggle
 
-    if StartToggle:
+    if PowerResetToggle:
         for p in range(num_pixels):
             pixels[p] = (0, 0, 0)   # init board
 
@@ -175,6 +175,7 @@ def start_stop():
 
 
 # stop button
+def stop():
 
 
 
