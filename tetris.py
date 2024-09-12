@@ -5,23 +5,23 @@ from adafruit_pyportal import PyPortal
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 import terminalio
+import random
 
 display = board.DISPLAY
 display.rotation = 90
 main_group = displayio.Group()
 
-GRID_WIDTH = 8
-GRID_HEIGHT = 11
-BLOCK_SIZE = 40
+GRID_WIDTH = 16
+GRID_HEIGHT = 22
+BLOCK_SIZE = 20
 
 COLORS = [
-    0x000000,  # 0 Black (empty)
-    0x808080,  # 1 Gray
-    0x90EE90,  # 2 LightGreen
-    0xFFB6C1,  # 3 Pink
-    0x0000FF,  # 4 Blue
-    0xFFA500,  # 5 Orange
-    0x800080,  # 6 Purple
+    0x808080,  # 0 Gray
+    0x90EE90,  # 1 LightGreen
+    0xFFB6C1,  # 2 Pink
+    0x0000FF,  # 3 Blue
+    0xFFA500,  # 4 Orange
+    0x800080,  # 5 Purple
 ]
 
 TETROMINOS = [
@@ -45,7 +45,7 @@ for row in range(GRID_HEIGHT):
             row * BLOCK_SIZE,  # y pos
             BLOCK_SIZE,        # w
             BLOCK_SIZE,        # h
-            fill=COLORS[0]     # init black
+            fill=0x000000
         )
         main_group.append(block)
         grid_row.append(block)
@@ -65,16 +65,13 @@ main_group.append(score_text)
 # Update color of a block at row, col
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
-    
-# testing
-# time.sleep(2)
-# update_block_color(0, 0, 1)
-# time.sleep(2)
-# update_block_color(1, 7, 2)
-# time.sleep(2)
-# update_block_color(10, 7, 4)
-# time.sleep(2)
-# update_block_color(10, 1, 6)
 
+for i in range(len(TETROMINOS)):
+    tetromino = TETROMINOS[i]
+    color = random.randint(0, len(COLORS) - 1)
+    for (x, y) in tetromino:
+        update_block_color(x, y + i * 2, color)
+    time.sleep(1)
+time.sleep(10)
 
 display.refresh()

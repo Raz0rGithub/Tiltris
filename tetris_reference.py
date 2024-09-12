@@ -143,7 +143,7 @@ class Application(tk.Frame):
 
 
 
-# start & reset button
+# power & reset button
 
 # Set up the A5 pin for analog input
 analog_in = AnalogIn(board.A5)
