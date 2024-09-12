@@ -80,24 +80,26 @@ while True:
             gy_bias = gyro[1]
             gz_bias = gyro[2]
 
-        tilt = abs(ay) > 1.0 or abs(az) > 1.0 or abs(
+        tilt = abs(ay) > 0.6 or abs(az) > 0.6 or abs(
             gz) > 0.5 or abs(gy) > 0.5 or abs(gx) > 0.5
         cooldown -= 1
 
-        if not tilt and cooldown <= 0:
-            if ax > 0.5:
-                print("move_right()")
-                position += 1
-                if position > 15:
-                    position = 15
-                cooldown = 10
+        if not tilt:
+            if ax > 0.4:
+                if cooldown < 0:
+                    print("move_right()")
+                    position += 1
+                    if position > 15:
+                        position = 15
+                cooldown = 5
 
-            if ax < -0.5:
-                print("move_left()")
-                position -= 1
-                if position < 0:
-                    position = 0
-                cooldown = 10
+            if ax < -0.4:
+                if cooldown < 0:
+                    print("move_left()")
+                    position -= 1
+                    if position < 0:
+                        position = 0
+                cooldown = 5
 
         output = ""
         for x in range(0, position):
@@ -105,8 +107,8 @@ while True:
         output += "[X]"
         for x in range(position, 16):
             output += "[ ]"
-        print("Tilt = {0}   Acceleration: X:{1:7.2f}, Y:{2:7.2f}, Z:{3:7.2f} m/s^2      Gyro: X:{4:7.2f}, Y:{5:7.2f}, Z:{6:7.2f} rad/s".format(tilt, ax, ay, az, *gyro))
-        # print("Tilt = {0} Cooldown = {1}".format(tilt, cooldown))
+        # print("Tilt = {0}   Acceleration: X:{1:7.2f}, Y:{2:7.2f}, Z:{3:7.2f} m/s^2      Gyro: X:{4:7.2f}, Y:{5:7.2f}, Z:{6:7.2f} rad/s".format(tilt, ax, ay, az, *gyro))
+        print("Tilt = {0} Cooldown = {1}".format(tilt, cooldown))
         print(output)
 
         time.sleep(dT)
