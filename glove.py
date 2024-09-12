@@ -128,8 +128,8 @@ while True:
                 button_2_short_press()
 
         x_tilt = (
-            abs(ay) > 1.0
-            or abs(az) > 1.0
+            abs(ay) > 1.25
+            or abs(az) > 1.25
             or abs(gz) > 0.5
             or abs(gy) > 0.5
             or abs(gx) > 0.5
@@ -138,14 +138,14 @@ while True:
         tilt_cooldown -= 1
 
         if not x_tilt and cooldown < 0:
-            if ax < -1.0:
+            if ax < -0.9:
                 print("move_right()")
                 position += 1
                 if position > 15:
                     position = 15
                 cooldown = 6
 
-            if ax > 1.0:
+            if ax > 0.9:
                 print("move_left()")
                 position -= 1
                 if position < 0:
@@ -153,7 +153,7 @@ while True:
                 cooldown = 6
 
         if tilt_cooldown < 0:
-            if ay > 3.0:
+            if ay > 2.5:
                 print("rotation()")
                 rotation += 1
                 if rotation > 3:
