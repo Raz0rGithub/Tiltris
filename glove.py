@@ -25,7 +25,7 @@ switch2 = Debouncer(pin2)
 print("Calculating Bias. Center Position and Tilt of Glove and hit Start")
 start = False
 on = True
-while start == False:
+while start is False:
     switch1.update()
     if switch1.fell:
         on = not on
@@ -45,13 +45,17 @@ while start == False:
             start = True
 print("Bias Calculated.")
 print(
-    "Acceleration Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(ax_bias, ay_bias, az_bias))
+    "Acceleration Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2"
+    .format(ax_bias, ay_bias, az_bias))
 print(
-    "Gyro Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(gx_bias, gy_bias, gz_bias))
+    "Gyro Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2"
+    .format(gx_bias, gy_bias, gz_bias))
 
 dT = 0.033
 cooldown = 0
 position = 7
+tilt_cooldown = 0
+rotation = 0
 while True:
     # Update
     switch1.update()
@@ -80,35 +84,59 @@ while True:
             gy_bias = gyro[1]
             gz_bias = gyro[2]
 
-        tilt = abs(ay) > 0.6 or abs(az) > 0.6 or abs(
+        x_tilt = abs(ay) > 1.0 or abs(az) > 1.0 or abs(
             gz) > 0.5 or abs(gy) > 0.5 or abs(gx) > 0.5
         cooldown -= 1
+        tilt_cooldown -= 1
 
-        if not tilt:
-            if ax > 0.4:
-                if cooldown < 0:
-                    print("move_right()")
-                    position += 1
-                    if position > 15:
-                        position = 15
-                cooldown = 5
+        if not x_tilt and cooldown < 0:
+            if ax < -1.0:
+                print("move_right()")
+                position += 1
+                if position > 15:
+                    position = 15
+                cooldown = 6
 
-            if ax < -0.4:
-                if cooldown < 0:
-                    print("move_left()")
-                    position -= 1
-                    if position < 0:
-                        position = 0
-                cooldown = 5
+            if ax > 1.0:
+                print("move_left()")
+                position -= 1
+                if position < 0:
+                    position = 0
+                cooldown = 6
+
+        if tilt_cooldown < 0:
+            if ay > 2.5:
+                print("rotation()")
+                rotation += 1
+                if rotation > 3:
+                    rotation = 0
+                tilt_cooldown = 10
+
+            if ay < -2.5:
+                print("drop()")
+                tilt_cooldown = 20
 
         output = ""
         for x in range(0, position):
             output += "[ ]"
-        output += "[X]"
+
+        if rotation == 0:
+            output += "[|]"
+        elif rotation == 1:
+            output += "[/]"
+        elif rotation == 2:
+            output += "[-]"
+        elif rotation == 3:
+            output += "[\\]"
+
         for x in range(position, 16):
             output += "[ ]"
-        # print("Tilt = {0}   Acceleration: X:{1:7.2f}, Y:{2:7.2f}, Z:{3:7.2f} m/s^2      Gyro: X:{4:7.2f}, Y:{5:7.2f}, Z:{6:7.2f} rad/s".format(tilt, ax, ay, az, *gyro))
-        print("Tilt = {0} Cooldown = {1}".format(tilt, cooldown))
+
+        # print("x_Tilt = {0}   Acceleration: X:{1:7.2f}, Y:{2:7.2f}, Z:{3:7.2f} m/s^2"
+        #      .format(x_tilt, ax, ay, az, *gyro))
+        # print("Tilt = {0}   Gyro: X:{1:7.2f}, Y:{2:7.2f}, Z:{3:7.2f} rad/s"
+        #       .format(tilt, ax, ay, az, *gyro))
+        # print("Tilt = {0} Cooldown = {1}".format(x_tilt, cooldown))
         print(output)
 
         time.sleep(dT)
