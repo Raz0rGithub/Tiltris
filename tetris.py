@@ -80,11 +80,29 @@ def in_bounds(tetromino, x_offset, y_offset):
     return True
 
 
+# Check if space is free
+def is_free_space(tetromino, x_offset, y_offset):
+    for (x, y) in tetromino:
+        # Update new position
+        new_x = x + x_offset
+        new_y = y + y_offset
+         
+        # Ensure within grid bounds
+        if new_y < 0 or new_y >= GRID_HEIGHT or new_x < 0 or new_x >= GRID_WIDTH:
+            return False
+            
+            if  grid[new_x][new_y].fill != 0: #0 for black
+                return False
+            
+    return True
+
+
 # Ensure random tetrominos
 def get_random_block():
     return random.choice(TETROMINOS)
+    
 
-# Place tetrominos on the grid
+# Set up for tetrominos
 for i in range(len(grid)):
     tetromino = get_random_block()
     color = random.randint(0, len(COLORS) - 1)
@@ -92,13 +110,17 @@ for i in range(len(grid)):
     x_offset = 6
     # Prevent overlap
     y_offset = i * 2 
-
-    # Check if the tetromino is within bounds before drawing
-    if in_bounds(tetromino, x_offset, y_offset):
+    
+    # Check for free and in bounds space
+    if is_free_space(tetromino, x_offset, y_offset) and in_bounds(tetromino, x_offset, y_offset):
+        print('Good to go!')
+        # Place the tetromino
         for (x, y) in tetromino:
             update_block_color( y + y_offset, x + x_offset, color)
     else:
         print(f"Tetromino {i} is out of bounds!")
+        
+        break
 
     time.sleep(1)
 
