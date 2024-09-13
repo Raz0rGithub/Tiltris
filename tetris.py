@@ -62,16 +62,44 @@ score_text = label.Label(
 )
 main_group.append(score_text)
 
+
 # Update color of a block at row, col
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
 
-for i in range(len(TETROMINOS)):
-    tetromino = TETROMINOS[i]
-    color = random.randint(0, len(COLORS) - 1)
+
+# Check to see if block is in bounds
+def in_bounds(tetromino, x_offset, y_offset):
     for (x, y) in tetromino:
-        update_block_color(x, y + i * 2, color)
+        # Check for horizontal bounds
+        if x_offset < 0 or x_offset >= GRID_WIDTH - 1:
+            return False
+        # Check for vertical bounds
+        if y_offset < 0 or y_offset >= GRID_HEIGHT - 1:
+            return False
+    return True
+
+
+# Ensure random tetrominos
+def get_random_block():
+    return random.choice(TETROMINOS)
+
+# Place tetrominos on the grid
+for i in range(len(grid)):
+    tetromino = get_random_block()
+    color = random.randint(0, len(COLORS) - 1)
+    # Ensure block starts in the middle
+    x_offset = 6
+    # Prevent overlap
+    y_offset = i * 2 
+
+    # Check if the tetromino is within bounds before drawing
+    if in_bounds(tetromino, x_offset, y_offset):
+        for (x, y) in tetromino:
+            update_block_color( y + y_offset, x + x_offset, color)
+    else:
+        print(f"Tetromino {i} is out of bounds!")
+
     time.sleep(1)
-time.sleep(10)
 
 display.refresh()
