@@ -1,3 +1,5 @@
+import adafruit_rfm9x
+import busio
 import board
 import time
 import digitalio
@@ -6,12 +8,19 @@ from busio import I2C
 from adafruit_lis3mdl import LIS3MDL
 from adafruit_debouncer import Debouncer
 
+# BOARD
 i2c = I2C(board.SCL, board.SDA)  # Create library object using our Bus I2C port
 accel_gyro = LSM6DS(i2c)
 mag = LIS3MDL(i2c)
 
-on = True
+# LORA
+spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+cs = digitalio.DigitalInOut(board.D9)
+reset = digitalio.DigitalInOut(board.D10)
+rfm9x = adafruit_rfm9x.RFM9x(spi, cs, reset, 915.0, baudrate=1000000)
 
+# Var Inits
+on = True
 acceleration = [0, 0, 0]
 ax_bias = 0
 ay_bias = 0
@@ -36,16 +45,19 @@ switch2 = Debouncer(pin2)
 
 def button_1_short_press():
     print("on_off()")
+    rfm9x.send('on_off()')
     global on
     on = not on
 
 
 def button_1_long_press():
     print("reset()")
+    rfm9x.send('reset()')
 
 
 def button_2_short_press():
     print("start()")
+    rfm9x.send('start()')
 
 
 def button_2_long_press():
@@ -140,6 +152,7 @@ while True:
         if not x_tilt and cooldown < 0:
             if ax < -0.9:
                 print("move_right()")
+                rfm9x.send('move_right()')
                 position += 1
                 if position > 15:
                     position = 15
@@ -147,6 +160,7 @@ while True:
 
             if ax > 0.9:
                 print("move_left()")
+                rfm9x.send('move_left()')
                 position -= 1
                 if position < 0:
                     position = 0
@@ -155,6 +169,7 @@ while True:
         if tilt_cooldown < 0:
             if ay > 2.5:
                 print("rotation()")
+                rfm9x.send('rotation()')
                 rotation += 1
                 if rotation > 3:
                     rotation = 0
@@ -162,6 +177,7 @@ while True:
 
             if ay < -3.0:
                 print("drop()")
+                rfm9x.send('drop()')
                 tilt_cooldown = 10
 
         output = ""
