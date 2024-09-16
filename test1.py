@@ -68,6 +68,7 @@ main_group.append(score_text)
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
 
+
 score = 0
 level = 0
 total_lines_eliminated = 0
@@ -132,19 +133,32 @@ def apply_tetromino():
 def is_cell_free(row, col):
     return row < GRID_HEIGHT and 0 <= col < GRID_WIDTH and (row < 0 or grid[row][col].fill == 0)
 
+
 def clear_tetromino():
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = 0
-    
+
+
+def check_apply():
+    if d_row == 1 and d_col == 0 and not all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
+        game_over = any(row < 0 for (row, col) in get_tetromino_coords())
+        if not game_over:
+            apply_tetromino()
+        else:
+            print('GAME OVER!')
+
+
 def move(d_row, d_col):
     global game_over, tetromino_offset
 
     # Clear the previous position
     clear_tetromino()
 
+    # if free, move
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
-        tetromino_offset = [tetromino_offset[0] + d_row, tetromino_offset[1] + d_col]
+        tetromino_offset = [tetromino_offset[0] +
+                            d_row, tetromino_offset[1] + d_col]
 
     # Update the tetromino at the new position
     for (row, col) in get_tetromino_coords():
@@ -152,15 +166,10 @@ def move(d_row, d_col):
         if -1 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
-    # If going down by 1 is not free and game not over, set block down. Otherwise, game over
-    if d_row == 1 and d_col == 0 and not all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
-        game_over = any(row < 0 for (row, col) in get_tetromino_coords())
-        if not game_over:
-            apply_tetromino()
-        else:
-            print('GAME OVER!')
+    # check_apply()
 
 # ---- Application ----
+
 
 reset_tetromino()
 first_move_time = time.monotonic()
