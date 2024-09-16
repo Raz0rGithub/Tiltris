@@ -147,23 +147,36 @@ def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
     global score, total_lines_eliminated, level, grid
     for (row, col) in get_tetromino_coords():
-        grid[row][col].fill = tetromino_color
-    
+        grid[row][col].fill = COLORS[tetromino_color]
+    time.sleep(2)
+
     # If any row is full, eliminate
-    new_rows = []
-    for row in grid:
+    cleared_rows = []
+    for row in range(len(grid)):
         n_filled_tiles = 0
-        for tile in row:
-            if tile:
+        for tile in grid[row]:
+            cur_color = tile.fill
+            if cur_color != 0:
                 n_filled_tiles += 1
         if n_filled_tiles == GRID_WIDTH:
-            new_rows.append(row)
+            cleared_rows.append(row)
 
-    lines_eliminated = len(grid) - len(new_rows)
+    lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
-    
-    # NEXT: need to shift down above rows
+    time.sleep(2)
 
+    # need to shift down above rows
+    if cleared_rows:
+        for row_to_clear in reversed(cleared_rows):
+            # Shift down all rows above cleared row by one
+            for r in range(row_to_clear, 0, -1):
+                for col in range(GRID_WIDTH):
+                    grid[r][col].fill = grid[r - 1][col].fill
+            # Clear top row
+            for col in range(GRID_WIDTH):
+                grid[0][col].fill = 0x000000
+
+    time.sleep(5)
     reset_tetromino()
 
 display.refresh()
