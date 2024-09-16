@@ -1,3 +1,10 @@
+from adafruit_debouncer import Debouncer
+from adafruit_lis3mdl import LIS3MDL
+from busio import I2C
+from adafruit_lsm6ds.lsm6dsox import LSM6DSOX as LSM6DS
+import digitalio
+import busio
+import adafruit_rfm9x
 import time
 import board
 import displayio
@@ -73,8 +80,11 @@ main_group.append(Rect(
 main_group.append(score_text)
 
 # Update color of a block at row, col
+
+
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
+
 
 score = 0
 level = 0
@@ -91,7 +101,8 @@ def reset_tetromino():
     tetromino_index = TETROMINOS.index(tetromino)
     tetromino_color = COLORS[tetromino_index]
     tetromino_offset = [-1, GRID_WIDTH // 2]
-    game_over = any(not is_cell_free(row, col) for (row, col) in get_tetromino_coords())
+    game_over = any(not is_cell_free(row, col)
+                    for (row, col) in get_tetromino_coords())
 
 
 def get_tetromino_coords():
@@ -144,6 +155,7 @@ def clear_tetromino():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = 0
 
+
 def move(d_row, d_col):
     global game_over, tetromino_offset
 
@@ -152,7 +164,8 @@ def move(d_row, d_col):
 
     # if free, move
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
-        tetromino_offset = [tetromino_offset[0] + d_row, tetromino_offset[1] + d_col]
+        tetromino_offset = [tetromino_offset[0] +
+                            d_row, tetromino_offset[1] + d_col]
     elif d_row == 1 and d_col == 0:
         game_over = any(row < 0 for (row, col) in get_tetromino_coords())
         if not game_over:
@@ -164,12 +177,30 @@ def move(d_row, d_col):
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
+
+# ---- Button ----
+pin1 = digitalio.DigitalInOut(board.D3)
+pin1.direction = digitalio.Direction.INPUT
+pin1.pull = digitalio.Pull.UP
+switch1 = Debouncer(pin1)
+
+
+def button_1_short_press():
+    move_left()
+
+
+def button_1_long_press():
+    move_right()
+
+
+S1Timer = 0
+
 # ---- Application ----
 
 for row in range(4, GRID_HEIGHT):
     for col in range(GRID_WIDTH):
         if col != 8 and col != 9:
-             grid[row][col].fill = 0xf0f000
+            grid[row][col].fill = 0xf0f000
 
 reset_tetromino()
 first_move_time = time.monotonic()
@@ -179,5 +210,14 @@ while (not game_over):
         last_move_time = time.monotonic()
         print(tetromino_offset)
         move(1, 0)
-        
+
+    switch1.update()
+    if switch1.fell:
+        S1Timer = time.monotonic()
+    if switch1.rose:
+        if time.monotonic() > S1Timer + 0.5:
+            left()
+        else:
+            right()
+
 print('game over!')
