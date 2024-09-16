@@ -179,4 +179,29 @@ def apply_tetromino():
     time.sleep(5)
     reset_tetromino()
 
+def is_cell_free(row, col):
+    return row < GRID_HEIGHT and 0 <= col < GRID_WIDTH and (row < 0 or grid[row][col].fill == 0)
+
+def move(d_row, d_col):
+    global game_over, tetromino_offset
+    if game_over:
+        return
+
+    print(tetromino)
+    if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
+        tetromino_offset = [tetromino_offset[0] + d_row, tetromino_offset[1] + d_col]
+    elif d_row == 1 and d_col == 0:
+        game_over = any(row < 0 for (row, col) in get_tetromino_coords())
+        if not game_over:
+            apply_tetromino()
+
+for i in range(GRID_WIDTH):
+    if i != 7 and i != 8:
+        grid[1][i].fill = COLORS[4]
+time.sleep(5)
+
+reset_tetromino()
+apply_tetromino()
+move(2, 2)
+
 display.refresh()
