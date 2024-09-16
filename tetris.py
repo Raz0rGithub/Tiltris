@@ -175,8 +175,8 @@ for row in range(2, GRID_HEIGHT):
 reset_tetromino()
 first_move_time = time.monotonic()
 last_move_time = time.monotonic()
-while (time.monotonic() < first_move_time + 30.0):
-    if (time.monotonic() > last_move_time + 1.0):
+while (time.monotonic() < first_move_time + 300.0):
+    if (time.monotonic() > last_move_time + 0.25):
         last_move_time = time.monotonic()
         print(tetromino_offset)
         move(1, 0)
