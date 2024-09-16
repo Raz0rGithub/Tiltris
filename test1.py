@@ -62,6 +62,13 @@ score_text = label.Label(
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
 main_group.append(score_text)
+main_group.append(Rect(
+    23 * BLOCK_SIZE,  # x pos
+    0,  # y pos
+    GRID_WIDTH,        # w
+    BLOCK_SIZE,        # h
+    fill=0x808080)
+)
 
 
 # Update color of a block at row, col
