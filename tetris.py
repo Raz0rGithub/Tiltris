@@ -103,27 +103,27 @@ def get_random_block():
     return random.choice(TETROMINOS)
 
 
-# Set up for tetrominos
-for i in range(len(grid)):
-    tetromino = get_random_block()
-    color = random.randint(0, len(COLORS) - 1)
-    # Ensure block starts in the middle
-    x_offset = 6
-    # Prevent overlap
-    y_offset = i * 2
+# # Set up for tetrominos
+# for i in range(len(grid)):
+#     tetromino = get_random_block()
+#     color = random.randint(0, len(COLORS) - 1)
+#     # Ensure block starts in the middle
+#     x_offset = 6
+#     # Prevent overlap
+#     y_offset = i * 2
 
-    # Check for free and in bounds space
-    if is_free_space(tetromino, x_offset, y_offset) and in_bounds(tetromino, x_offset, y_offset):
-        print('Good to go!')
-        # Place the tetromino
-        for (x, y) in tetromino:
-            update_block_color(y + y_offset, x + x_offset, color)
-    else:
-        print(f"Tetromino {i} is out of bounds!")
+#     # Check for free and in bounds space
+#     if is_free_space(tetromino, x_offset, y_offset) and in_bounds(tetromino, x_offset, y_offset):
+#         print('Good to go!')
+#         # Place the tetromino
+#         for (x, y) in tetromino:
+#             update_block_color(y + y_offset, x + x_offset, color)
+#     else:
+#         print(f"Tetromino {i} is out of bounds!")
 
-        break
+#         break
 
-    time.sleep(1)
+#     time.sleep(1)
 
 score = 0
 level = 0
@@ -153,7 +153,7 @@ def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
     global score, total_lines_eliminated, level, grid
     for (row, col) in get_tetromino_coords():
-        grid[row][col].fill = COLORS[tetromino_color]
+        grid[row][col].fill = tetromino_color
     time.sleep(2)
 
     # If any row is full, eliminate
@@ -205,13 +205,19 @@ def move(d_row, d_col):
             apply_tetromino()
 
 
-for i in range(GRID_WIDTH):
-    if i != 7 and i != 8:
-        grid[1][i].fill = COLORS[4]
-time.sleep(5)
+# for i in range(GRID_WIDTH):
+#     if i != 7 and i != 8:
+#         grid[1][i].fill = COLORS[4]
+# time.sleep(5)
 
 reset_tetromino()
+while x in range(0, 5):
+    move(0, 1)
+    time.sleep(1)
 apply_tetromino()
-move(2, 2)
+reset_tetromino()
+while x in range(0, 2):
+    move(0, 1)
+    time.sleep(1)
 
 display.refresh()
