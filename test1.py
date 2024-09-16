@@ -187,7 +187,6 @@ switch1 = Debouncer(pin1)
 S1Timer = 0
 
 # ---- Application ----
-
 for row in range(4, GRID_HEIGHT):
     for col in range(GRID_WIDTH):
         if col != 8 and col != 9:
@@ -207,8 +206,8 @@ while (not game_over):
         S1Timer = time.monotonic()
     if switch1.rose:
         if time.monotonic() > S1Timer + 0.5:
-            left()
+            move_left()
         else:
-            right()
+            move_right()
 
 print('game over!')
