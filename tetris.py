@@ -125,6 +125,7 @@ def get_random_block():
 
 #     time.sleep(1)
 
+
 score = 0
 level = 0
 total_lines_eliminated = 0
@@ -211,13 +212,17 @@ def move(d_row, d_col):
 # time.sleep(5)
 
 reset_tetromino()
-while x in range(0, 5):
-    move(0, 1)
-    time.sleep(1)
+time = time.monotonic()
+last_move_time = time.monotonic()
+while (time.monotonic() < time + 5.0):
+    if (time.monotonic() > last_move_time + 1.0):
+        last_move_time = time.monotonic()
+        move(1, 0)
 apply_tetromino()
 reset_tetromino()
-while x in range(0, 2):
-    move(0, 1)
-    time.sleep(1)
-
-display.refresh()
+time = time.monotonic()
+last_move_time = time.monotonic()
+while (time.monotonic() < time + 3.0):
+    if (time.monotonic() > last_move_time + 1.0):
+        last_move_time = time.monotonic()
+        move(1, 0)
