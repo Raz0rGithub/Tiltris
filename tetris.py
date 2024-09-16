@@ -103,7 +103,7 @@ def apply_tetromino():
     global score, total_lines_eliminated, level, grid, tetromino_color
     for (row, col) in get_tetromino_coords():
         grid[row][col].fill = tetromino_color
-    time.sleep(2)
+    time.sleep(1)
 
     # If any row is full, eliminate
     cleared_rows = []
@@ -118,7 +118,7 @@ def apply_tetromino():
 
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
-    time.sleep(2)
+    time.sleep(1)
 
     # need to shift down above rows
     if cleared_rows:
@@ -131,7 +131,7 @@ def apply_tetromino():
             for col in range(GRID_WIDTH):
                 grid[0][col].fill = 0x000000
 
-    time.sleep(5)
+    time.sleep(1)
     reset_tetromino()
 
 
@@ -163,10 +163,14 @@ def move(d_row, d_col):
     # Update the tetromino at the new position
     for (row, col) in get_tetromino_coords():
         print((row, col))
-        if -1 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
+        if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
 # ---- Application ----
+
+for row in range(2, GRID_HEIGHT):
+    for col in range(GRID_WIDTH - 1):
+        grid[row][col].fill = 0xf0f000
 
 reset_tetromino()
 first_move_time = time.monotonic()
