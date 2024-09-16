@@ -124,4 +124,46 @@ for i in range(len(grid)):
 
     time.sleep(1)
 
+score = 0
+level = 0
+total_lines_eliminated = 0
+game_over = False
+tetromino = []
+tetromino_color = 0
+tetromino_offset = [-2, GRID_WIDTH // 2]
+
+def reset_tetromino():
+    global tetromino, tetromino_color, tetromino_offset, game_over
+    tetromino = random.choice(TETROMINOS)[:]
+    tetromino_color = random.randint(1, len(COLORS) - 1)
+    tetromino_offset = [-2, GRID_WIDTH // 2]
+    game_over = any(not is_cell_free(row, col) for (row, col) in get_tetromino_coords())
+
+def get_tetromino_coords():
+    # Return coords of current tetromino as a list
+    return [(row + tetromino_offset[0], col + tetromino_offset[1]) for (row, col) in tetromino]
+
+def apply_tetromino():
+    # Add tetromino to tetris board and check for line elims
+    global score, total_lines_eliminated, level, grid
+    for (row, col) in get_tetromino_coords():
+        grid[row][col].fill = tetromino_color
+    
+    # If any row is full, eliminate
+    new_rows = []
+    for row in grid:
+        n_filled_tiles = 0
+        for tile in row:
+            if tile:
+                n_filled_tiles += 1
+        if n_filled_tiles == GRID_WIDTH:
+            new_rows.append(row)
+
+    lines_eliminated = len(grid) - len(new_rows)
+    total_lines_eliminated += lines_eliminated
+    
+    # NEXT: need to shift down above rows
+
+    reset_tetromino()
+
 display.refresh()
