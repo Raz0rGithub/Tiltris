@@ -61,20 +61,18 @@ score_text = label.Label(
     x=5,
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
-main_group.append(score_text)
 main_group.append(Rect(
-    23 * BLOCK_SIZE,  # x pos
-    0,  # y pos
-    GRID_WIDTH,        # w
+    0,  # x pos
+    22 * BLOCK_SIZE,  # y pos
+    GRID_WIDTH * BLOCK_SIZE,        # w
     BLOCK_SIZE,        # h
     fill=0x808080)
 )
-
+main_group.append(score_text)
 
 # Update color of a block at row, col
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
-
 
 score = 0
 level = 0
@@ -82,7 +80,7 @@ total_lines_eliminated = 0
 game_over = False
 tetromino = []
 tetromino_color = 0
-tetromino_offset = [-2, GRID_WIDTH // 2]
+tetromino_offset = [-1, GRID_WIDTH // 2]
 
 
 def reset_tetromino():
@@ -90,7 +88,7 @@ def reset_tetromino():
     tetromino = random.choice(TETROMINOS)[:]
     tetromino_index = TETROMINOS.index(tetromino)
     tetromino_color = COLORS[tetromino_index]
-    tetromino_offset = [-2, GRID_WIDTH // 2]
+    tetromino_offset = [-1, GRID_WIDTH // 2]
     game_over = any(not is_cell_free(row, col)
                     for (row, col) in get_tetromino_coords())
 
@@ -146,16 +144,6 @@ def clear_tetromino():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = 0
 
-
-def check_apply():
-    if d_row == 1 and d_col == 0 and not all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
-        game_over = any(row < 0 for (row, col) in get_tetromino_coords())
-        if not game_over:
-            apply_tetromino()
-        else:
-            print('GAME OVER!')
-
-
 def move(d_row, d_col):
     global game_over, tetromino_offset
 
@@ -164,8 +152,13 @@ def move(d_row, d_col):
 
     # if free, move
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
-        tetromino_offset = [tetromino_offset[0] +
-                            d_row, tetromino_offset[1] + d_col]
+        tetromino_offset = [tetromino_offset[0] + d_row, tetromino_offset[1] + d_col]
+    elif d_row == 1 and d_col == 0:
+        game_over = any(row < 0 for (row, col) in get_tetromino_coords())
+        if not game_over:
+            apply_tetromino()
+        else:
+            print('GAME OVER!')
 
     # Update the tetromino at the new position
     for (row, col) in get_tetromino_coords():
@@ -173,15 +166,12 @@ def move(d_row, d_col):
         if -1 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
-    # check_apply()
-
 # ---- Application ----
-
 
 reset_tetromino()
 first_move_time = time.monotonic()
 last_move_time = time.monotonic()
-while (time.monotonic() < first_move_time + 10.0):
+while (time.monotonic() < first_move_time + 30.0):
     if (time.monotonic() > last_move_time + 1.0):
         last_move_time = time.monotonic()
         print(tetromino_offset)
