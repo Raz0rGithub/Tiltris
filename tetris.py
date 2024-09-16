@@ -69,20 +69,8 @@ def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
 
 
-# Check to see if block is in bounds
-def in_bounds(tetromino, x_offset, y_offset):
-    for (x, y) in tetromino:
-        # Check for horizontal bounds
-        if x_offset < 0 or x_offset >= GRID_WIDTH - 1:
-            return False
-        # Check for vertical bounds
-        if y_offset < 0 or y_offset >= GRID_HEIGHT - 1:
-            return False
-    return True
-
-
-# Check if space is free
-def is_free_space(tetromino, x_offset, y_offset):
+# Check if space is free and within bounds
+def is_move_valid(tetromino, x_offset, y_offset):
     for (x, y) in tetromino:
         # Update new position
         new_x = x + x_offset
@@ -92,7 +80,7 @@ def is_free_space(tetromino, x_offset, y_offset):
         if new_y < 0 or new_y >= GRID_HEIGHT or new_x < 0 or new_x >= GRID_WIDTH:
             return False
 
-            if grid[new_x][new_y].fill != 0:  # 0 for black
+            if  grid[new_x][new_y].fill != 0: #0 for black
                 return False
 
     return True
@@ -113,7 +101,7 @@ def get_random_block():
 #     y_offset = i * 2
 
 #     # Check for free and in bounds space
-#     if is_free_space(tetromino, x_offset, y_offset) and in_bounds(tetromino, x_offset, y_offset):
+#     if is_move_valid(tetromino, x_offset, y_offset):
 #         print('Good to go!')
 #         # Place the tetromino
 #         for (x, y) in tetromino:
