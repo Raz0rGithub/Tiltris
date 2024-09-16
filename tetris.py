@@ -178,26 +178,30 @@ def apply_tetromino():
 def is_cell_free(row, col):
     return row < GRID_HEIGHT and 0 <= col < GRID_WIDTH and (row < 0 or grid[row][col].fill == 0)
 
-
+def clear_tetromino():
+    for (row, col) in get_tetromino_coords():
+        if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
+            grid[row][col].fill = 0
+    
 def move(d_row, d_col):
     global game_over, tetromino_offset
-    if game_over:
-        return
 
-    print(tetromino)
+    # Clear the previous position
+    clear_tetromino()
+
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
-        tetromino_offset = [tetromino_offset[0] +
-                            d_row, tetromino_offset[1] + d_col]
-    elif d_row == 1 and d_col == 0:
+        tetromino_offset = [tetromino_offset[0] + d_row, tetromino_offset[1] + d_col]
+
+    # Update the tetromino at the new position
+    for (row, col) in get_tetromino_coords():
+        if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
+            grid[row][col].fill = tetromino_color  # Update with tetromino color
+
+    # If going down by 1 is not free and game not over, set block down. Otherwise, game over
+    if d_row == 1 and d_col == 0 and not all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
         game_over = any(row < 0 for (row, col) in get_tetromino_coords())
         if not game_over:
             apply_tetromino()
-
-
-# for i in range(GRID_WIDTH):
-#     if i != 7 and i != 8:
-#         grid[1][i].fill = COLORS[4]
-# time.sleep(5)
 
 reset_tetromino()
 time = time.monotonic()
@@ -208,9 +212,3 @@ while (time.monotonic() < time + 5.0):
         move(1, 0)
 apply_tetromino()
 reset_tetromino()
-time = time.monotonic()
-last_move_time = time.monotonic()
-while (time.monotonic() < time + 3.0):
-    if (time.monotonic() > last_move_time + 1.0):
-        last_move_time = time.monotonic()
-        move(1, 0)
