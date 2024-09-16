@@ -16,25 +16,26 @@ GRID_HEIGHT = 22
 BLOCK_SIZE = 20
 
 COLORS = [
-    0x808080,  # 0 Gray
-    0x90EE90,  # 1 LightGreen
-    0xFFB6C1,  # 2 Pink
-    0x0000FF,  # 3 Blue
-    0xFFA500,  # 4 Orange
-    0x800080,  # 5 Purple
+    0xf0f000,  # 0 Yellow
+    0xf0a000,  # 1 Orange
+    0x0000f0,  # 2 Navy
+    0x00f000,  # 3 Green
+    0xa000f0,  # 4 Purple
+    0xf00000,  # 5 Red
+    0x00f0f0,  # 6 Cyan
 ]
 
 TETROMINOS = [
-    [(0, 0), (0, 1), (1, 0), (1,1)], # 0 O
-    [(0, 0), (0, 1), (1, 1), (2,1)], # 1 L
-    [(0, 1), (1, 1), (2, 1), (2,0)], # 2 J 
-    [(0, 1), (1, 0), (1, 1), (2,0)], # 3 Z
-    [(0, 1), (1, 0), (1, 1), (2,1)], # 4 T
-    [(0, 0), (1, 0), (1, 1), (2,1)], # 5 S
-    [(0, 1), (1, 1), (2, 1), (3,1)], # 6 I
+    [(0, 0), (0, 1), (1, 0), (1, 1)],  # 0 O Yellow
+    [(0, 0), (0, 1), (1, 1), (2, 1)],  # 1 L Orange
+    [(0, 1), (1, 1), (2, 1), (2, 0)],  # 2 J Navy
+    [(0, 1), (1, 0), (1, 1), (2, 0)],  # 3 Z Green
+    [(0, 1), (1, 0), (1, 1), (2, 1)],  # 4 T Purple
+    [(0, 0), (1, 0), (1, 1), (2, 1)],  # 5 S Red
+    [(0, 1), (1, 1), (2, 1), (3, 1)],  # 6 I Cyan
 ]
 
-# Create the Tetris grid (8x8 grid of blocks)
+# Create the Tetris grid
 grid = []
 for row in range(GRID_HEIGHT):
     grid_row = []
@@ -86,21 +87,21 @@ def is_free_space(tetromino, x_offset, y_offset):
         # Update new position
         new_x = x + x_offset
         new_y = y + y_offset
-         
+
         # Ensure within grid bounds
         if new_y < 0 or new_y >= GRID_HEIGHT or new_x < 0 or new_x >= GRID_WIDTH:
             return False
-            
-            if  grid[new_x][new_y].fill != 0: #0 for black
+
+            if grid[new_x][new_y].fill != 0:  # 0 for black
                 return False
-            
+
     return True
 
 
 # Ensure random tetrominos
 def get_random_block():
     return random.choice(TETROMINOS)
-    
+
 
 # Set up for tetrominos
 for i in range(len(grid)):
@@ -109,17 +110,17 @@ for i in range(len(grid)):
     # Ensure block starts in the middle
     x_offset = 6
     # Prevent overlap
-    y_offset = i * 2 
-    
+    y_offset = i * 2
+
     # Check for free and in bounds space
     if is_free_space(tetromino, x_offset, y_offset) and in_bounds(tetromino, x_offset, y_offset):
         print('Good to go!')
         # Place the tetromino
         for (x, y) in tetromino:
-            update_block_color( y + y_offset, x + x_offset, color)
+            update_block_color(y + y_offset, x + x_offset, color)
     else:
         print(f"Tetromino {i} is out of bounds!")
-        
+
         break
 
     time.sleep(1)
@@ -132,16 +133,21 @@ tetromino = []
 tetromino_color = 0
 tetromino_offset = [-2, GRID_WIDTH // 2]
 
+
 def reset_tetromino():
     global tetromino, tetromino_color, tetromino_offset, game_over
     tetromino = random.choice(TETROMINOS)[:]
-    tetromino_color = random.randint(1, len(COLORS) - 1)
+    tetromino_index = TETROMINOS.index(tetromino)
+    tetromino_color = COLORS[tetromino_index]
     tetromino_offset = [-2, GRID_WIDTH // 2]
-    game_over = any(not is_cell_free(row, col) for (row, col) in get_tetromino_coords())
+    game_over = any(not is_cell_free(row, col)
+                    for (row, col) in get_tetromino_coords())
+
 
 def get_tetromino_coords():
     # Return coords of current tetromino as a list
     return [(row + tetromino_offset[0], col + tetromino_offset[1]) for (row, col) in tetromino]
+
 
 def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
@@ -179,8 +185,10 @@ def apply_tetromino():
     time.sleep(5)
     reset_tetromino()
 
+
 def is_cell_free(row, col):
     return row < GRID_HEIGHT and 0 <= col < GRID_WIDTH and (row < 0 or grid[row][col].fill == 0)
+
 
 def move(d_row, d_col):
     global game_over, tetromino_offset
@@ -189,11 +197,13 @@ def move(d_row, d_col):
 
     print(tetromino)
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
-        tetromino_offset = [tetromino_offset[0] + d_row, tetromino_offset[1] + d_col]
+        tetromino_offset = [tetromino_offset[0] +
+                            d_row, tetromino_offset[1] + d_col]
     elif d_row == 1 and d_col == 0:
         game_over = any(row < 0 for (row, col) in get_tetromino_coords())
         if not game_over:
             apply_tetromino()
+
 
 for i in range(GRID_WIDTH):
     if i != 7 and i != 8:
