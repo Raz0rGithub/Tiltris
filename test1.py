@@ -11,7 +11,7 @@ display = board.DISPLAY
 display.rotation = 90
 main_group = displayio.Group()
 
-GRID_WIDTH = 16
+GRID_WIDTH = 14
 GRID_HEIGHT = 22
 BLOCK_SIZE = 20
 
@@ -61,14 +61,34 @@ score_text = label.Label(
     x=5,
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
+
+# Bottom Rect
 main_group.append(Rect(
     0,  # x pos
     22 * BLOCK_SIZE,  # y pos
-    GRID_WIDTH * BLOCK_SIZE,        # w
+    GRID_WIDTH * BLOCK_SIZE + 40,        # w
     BLOCK_SIZE,        # h
-    fill=0x808080)
+    fill=0xF4C2C2) # baby pink
 )
 main_group.append(score_text)
+
+# Left Rect 
+main_group.append(Rect(
+    0,  # x pos
+    0,  # y pos
+    BLOCK_SIZE,  # w
+    GRID_HEIGHT * BLOCK_SIZE,  # h
+    fill=0xF4C2C2) # baby pink
+)
+
+# Right Rect
+main_group.append(Rect(
+    GRID_WIDTH + 286,  # x pos
+    0,  # y pos
+    BLOCK_SIZE,  # w
+    GRID_HEIGHT * BLOCK_SIZE,  # h
+    fill=0xF4C2C2) # baby pink
+)
 
 # Update color of a block at row, col
 def update_block_color(row, col, color_index):
