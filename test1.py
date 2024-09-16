@@ -11,9 +11,11 @@ display = board.DISPLAY
 display.rotation = 90
 main_group = displayio.Group()
 
-GRID_WIDTH = 14
+GRID_WIDTH = 16
 GRID_HEIGHT = 22
 BLOCK_SIZE = 20
+
+START_GRID
 
 COLORS = [
     0xf0f000,  # 0 Yellow
@@ -61,34 +63,14 @@ score_text = label.Label(
     x=5,
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
-
-# Bottom Rect
 main_group.append(Rect(
     0,  # x pos
     22 * BLOCK_SIZE,  # y pos
-    GRID_WIDTH * BLOCK_SIZE + 40,        # w
+    GRID_WIDTH * BLOCK_SIZE,        # w
     BLOCK_SIZE,        # h
-    fill=0xF4C2C2) # baby pink
+    fill=0x808080)
 )
 main_group.append(score_text)
-
-# Left Rect 
-main_group.append(Rect(
-    0,  # x pos
-    0,  # y pos
-    BLOCK_SIZE,  # w
-    GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2) # baby pink
-)
-
-# Right Rect
-main_group.append(Rect(
-    GRID_WIDTH + 286,  # x pos
-    0,  # y pos
-    BLOCK_SIZE,  # w
-    GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2) # baby pink
-)
 
 # Update color of a block at row, col
 def update_block_color(row, col, color_index):
@@ -109,8 +91,7 @@ def reset_tetromino():
     tetromino_index = TETROMINOS.index(tetromino)
     tetromino_color = COLORS[tetromino_index]
     tetromino_offset = [-1, GRID_WIDTH // 2]
-    game_over = any(not is_cell_free(row, col)
-                    for (row, col) in get_tetromino_coords())
+    game_over = any(not is_cell_free(row, col) for (row, col) in get_tetromino_coords())
 
 
 def get_tetromino_coords():
@@ -120,10 +101,10 @@ def get_tetromino_coords():
 
 def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
-    global score, total_lines_eliminated, level, grid, tetromino_color
+    global score, total_lines_eliminated, level, grid, tetromino_color, score
     for (row, col) in get_tetromino_coords():
         grid[row][col].fill = tetromino_color
-    time.sleep(2)
+    time.sleep(1)
 
     # If any row is full, eliminate
     cleared_rows = []
@@ -138,7 +119,7 @@ def apply_tetromino():
 
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
-    time.sleep(2)
+    score += lines_eliminated
 
     # need to shift down above rows
     if cleared_rows:
@@ -151,7 +132,6 @@ def apply_tetromino():
             for col in range(GRID_WIDTH):
                 grid[0][col].fill = 0x000000
 
-    time.sleep(5)
     reset_tetromino()
 
 
@@ -177,25 +157,27 @@ def move(d_row, d_col):
         game_over = any(row < 0 for (row, col) in get_tetromino_coords())
         if not game_over:
             apply_tetromino()
-        else:
-            print('GAME OVER!')
 
     # Update the tetromino at the new position
     for (row, col) in get_tetromino_coords():
         print((row, col))
-        if -1 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
+        if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
 # ---- Application ----
 
+for row in range(4, GRID_HEIGHT):
+    for col in range(GRID_WIDTH):
+        if col != 8 and col != 9:
+             grid[row][col].fill = 0xf0f000
+
 reset_tetromino()
 first_move_time = time.monotonic()
 last_move_time = time.monotonic()
-while (time.monotonic() < first_move_time + 30.0):
-    if (time.monotonic() > last_move_time + 1.0):
+while (not game_over):
+    if (time.monotonic() > last_move_time + 0.5):
         last_move_time = time.monotonic()
         print(tetromino_offset)
         move(1, 0)
-clear_tetromino()
-
-# display.refresh()
+        
+print('game over!')
