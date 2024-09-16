@@ -184,15 +184,6 @@ pin1.direction = digitalio.Direction.INPUT
 pin1.pull = digitalio.Pull.UP
 switch1 = Debouncer(pin1)
 
-
-def button_1_short_press():
-    move_left()
-
-
-def button_1_long_press():
-    move_right()
-
-
 S1Timer = 0
 
 # ---- Application ----
