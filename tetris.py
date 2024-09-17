@@ -212,6 +212,7 @@ def move_right():
 def move_left():
     move(0, -1)
 
+
 def drop():
     global game_over, tetromino_offset
     clear_tetromino()
@@ -313,10 +314,10 @@ last_move_time = time.monotonic()
 pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
 
 while (not game_over):
-    if (time.monotonic() > last_move_time + 0.35):
+    if (time.monotonic() > last_move_time + drop_delay):
         last_move_time = time.monotonic()
         move(1, 0)
-        
+
     switch1.update()
     if switch1.fell:
         S1Timer = time.monotonic()
