@@ -103,9 +103,18 @@ main_group.append(Rect(
 main_group.append(score_text)
 main_group.append(level_text)
 
+# Update score and level
+def update_score(new_score):
+    global score
+    score = new_score
+    score_text.text = f'Score: {score}'
+
+def update_level(new_level):
+    global level
+    level = new_level
+    level_text.text = f'Level: {level}'
+
 # Update color of a block at row, col
-
-
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
 
@@ -156,7 +165,15 @@ def apply_tetromino():
 
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
-    score += lines_eliminated
+    update_score(score + lines_eliminated)
+    
+    # Check level update
+    new_level = total_lines_eliminated // 10 + 1
+    if new_level > level:
+        print("Next level")
+        update_level(new_level)
+    else:
+        print("Not yet!")
 
     # need to shift down above rows
     if cleared_rows:
