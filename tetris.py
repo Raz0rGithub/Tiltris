@@ -280,8 +280,8 @@ while (not game_over):
         last_move_time = time.monotonic()
         move(1, 0)
 
-    if (time.monotonic() > first_move_time + 5.0):
-        pyportal.peripherals.stop_play()
+    # if (time.monotonic() > first_move_time + 5.0):
+    #     pyportal.peripherals.stop_play()
 
     switch1.update()
     if switch1.fell:
