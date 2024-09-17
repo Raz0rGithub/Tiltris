@@ -8,11 +8,20 @@ from adafruit_display_text import label
 import terminalio
 import random
 from adafruit_debouncer import Debouncer
+import adafruit_rfm9x
+import busio
+
 # pyportal = PyPortal()
 
 display = board.DISPLAY
 display.rotation = 90
 main_group = displayio.Group()
+
+# LORA
+spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+cs = digitalio.DigitalInOut(board.SD_CS)
+reset = digitalio.DigitalInOut(board.D4)
+rfm9x = adafruit_rfm9x.RFM9x(spi=spi, cs=cs, reset=reset, frequency=915.0, baudrate=1000000)
 
 GRID_WIDTH = 14
 GRID_HEIGHT = 22
@@ -314,18 +323,18 @@ def rotate():
 
 
 # ---- Buttons ----
-pin1 = digitalio.DigitalInOut(board.D3)
-pin1.direction = digitalio.Direction.INPUT
-pin1.pull = digitalio.Pull.UP
-switch1 = Debouncer(pin1)
+# pin1 = digitalio.DigitalInOut(board.D3)
+# pin1.direction = digitalio.Direction.INPUT
+# pin1.pull = digitalio.Pull.UP
+# switch1 = Debouncer(pin1)
 
-pin2 = digitalio.DigitalInOut(board.D4)
-pin2.direction = digitalio.Direction.INPUT
-pin2.pull = digitalio.Pull.UP
-switch2 = Debouncer(pin2)
+# pin2 = digitalio.DigitalInOut(board.D4)
+# pin2.direction = digitalio.Direction.INPUT
+# pin2.pull = digitalio.Pull.UP
+# switch2 = Debouncer(pin2)
 
-S1Timer = 0
-S2Timer = 0
+# S1Timer = 0
+# S2Timer = 0
 
 # ---- Application ----
 
@@ -339,28 +348,28 @@ first_move_time = time.monotonic()
 last_move_time = time.monotonic()
 # pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
 
-while (not game_over):
-    if (time.monotonic() > last_move_time + drop_delay):
+while not game_over:
+    print("listening...")
+    packet = rfm9x.receive(timeout=0.4)
+    if not packet is None:
+        packet_text = str(packet, 'ascii')
+        print("Received: {0}".format(packet_text))
+
+    if time.monotonic() > last_move_time + drop_delay:
         last_move_time = time.monotonic()
         move(1, 0)
-
-    switch1.update()
-    if switch1.fell:
-        S1Timer = time.monotonic()
-    if switch1.rose:
-        if time.monotonic() > S1Timer + 0.3:
-            move_left()
-        else:
-            move_right()
-
-    switch2.update()
-    if switch2.fell:
-        S2Timer = time.monotonic()
-    if switch2.rose:
-        if time.monotonic() > S2Timer + 0.3:
-            drop()
-        else:
-            rotate()
+        
+    if packet_text == "move_left()":
+        move_left()
+        
+    elif packet_text == "move_right()":
+        move_right()
+        
+    elif packet_text == "drop()":
+        drop()
+        
+    elif packet_text == "rotate()":
+        rotate()
 
 
 def game_over_screen():
