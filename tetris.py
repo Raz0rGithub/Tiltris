@@ -164,8 +164,6 @@ def apply_tetromino():
         if n_filled_tiles == GRID_WIDTH:
             cleared_rows.append(row)
 
-    print(cleared_rows)
-
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
     update_score(score + lines_eliminated * 5)
