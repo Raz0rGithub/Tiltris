@@ -59,39 +59,49 @@ display.root_group = main_group
 
 score_text = label.Label(
     terminalio.FONT,
-    text='0',
+    text='Score: 0',
     color=0xFFFFFF,
     x=5,
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
-
-# Bottom Rect
-main_group.append(Rect(
-    0,  # x pos
-    22 * BLOCK_SIZE,  # y pos
-    GRID_WIDTH * BLOCK_SIZE + 40,        # w
-    BLOCK_SIZE,        # h
-    fill=0xF4C2C2)  # baby pink
+        
+level_text = label.Label(
+    terminalio.FONT,
+    text='Level: 1',
+    color=0xFFFFFF,
+    x=GRID_WIDTH * BLOCK_SIZE - 15,
+    y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
-main_group.append(score_text)
 
-# Left Rect
+# Left border 
 main_group.append(Rect(
     0,  # x pos
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2)  # baby pink
+    fill=0xF4C2C2) # baby pink
 )
 
-# Right Rect
+# Right border
 main_group.append(Rect(
     GRID_WIDTH + 286,  # x pos
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2)  # baby pink
+    fill=0xF4C2C2) # baby pink
 )
+
+# Bottom border
+main_group.append(Rect(
+    0,  # x pos
+    22 * BLOCK_SIZE,  # y pos
+    GRID_WIDTH * BLOCK_SIZE + 40,        # w
+    BLOCK_SIZE,        # h
+    fill=0xF4C2C2) # baby pink
+)
+
+main_group.append(score_text)
+main_group.append(level_text)
 
 # Update color of a block at row, col
 def update_block_color(row, col, color_index):
