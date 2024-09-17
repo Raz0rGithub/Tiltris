@@ -70,43 +70,45 @@ level_text = label.Label(
     terminalio.FONT,
     text='Level: 1',
     color=0xFFFFFF,
-    x=GRID_WIDTH * BLOCK_SIZE - 15,
+    x=GRID_WIDTH * BLOCK_SIZE - 20,
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
 
-# Left border
-main_group.append(Rect(
+# Rect 1 (Left)
+left_border = Rect(
     0,  # x pos
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2)  # baby pink
+    fill=0xF4C2C2  # baby pink
 )
+main_group.append(left_border)
 
-# Right border
-main_group.append(Rect(
-    GRID_WIDTH + 286,  # x pos
+# Rect 2 (Right)
+right_border = Rect(
+    GRID_WIDTH * BLOCK_SIZE + 20,  # x pos
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2)  # baby pink
+    fill=0xF4C2C2  # baby pink
 )
+main_group.append(right_border)
 
-# Bottom border
-main_group.append(Rect(
+# Rect 3 (Bottom)
+bottom_border = Rect(
     0,  # x pos
-    22 * BLOCK_SIZE,  # y pos
-    GRID_WIDTH * BLOCK_SIZE + 40,        # w
-    BLOCK_SIZE,        # h
-    fill=0xF4C2C2)  # baby pink
+    GRID_HEIGHT * BLOCK_SIZE,  # y pos
+    GRID_WIDTH * BLOCK_SIZE + 40,  # w
+    BLOCK_SIZE,  # h
+    fill=0xF4C2C2  # baby pink
 )
+main_group.append(bottom_border)
 
 main_group.append(score_text)
 main_group.append(level_text)
 
+
 # Update score and level
-
-
 def update_score(new_score):
     global score
     score = new_score
@@ -115,13 +117,36 @@ def update_score(new_score):
 
 def update_level(new_level):
     global level, drop_delay
-    level = new_level
-    level_text.text = f'Level: {level}'
-    drop_delay = 0.5 * pow(0.75, level - 1)
+    previous_level = 0
+    if new_level > previous_level:
+        level = new_level
+        previous_level = new_level
+        drop_delay = 0.5 * pow(0.75, level - 1)
+        start_flashing()
+
+def start_flashing():
+    border_rects = [
+        left_border,  # Left border
+        right_border,  # Right border
+        bottom_border   # Bottom border
+    ]
+    
+    # Flash borders 5 times
+    for _ in range(5):
+        for rect in border_rects:
+            rect.fill = 0xFFFFFF # White
+            rect.fill = 0x808080 # Gray
+        display.refresh()
+        time.sleep(0.1)
+        
+        # Set borders back to OG color
+        for rect in border_rects:
+            rect.fill = 0xF4C2C2
+        display.refresh()
+        time.sleep(0.1)
+
 
 # Update color of a block at row, col
-
-
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
 
@@ -154,6 +179,7 @@ def get_tetromino_coords():
 def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
     global score, total_lines_eliminated, level, grid, tetromino_color, score
+    
     for (row, col) in get_tetromino_coords():
         grid[row][col].fill = tetromino_color
     time.sleep(1)
@@ -171,16 +197,6 @@ def apply_tetromino():
 
     print(cleared_rows)
 
-    lines_eliminated = len(cleared_rows)
-    total_lines_eliminated += lines_eliminated
-    update_score(score + lines_eliminated)
-
-    # Check level update
-    new_level = score // 10 + 1
-    if new_level > level:
-        print("Next level")
-        update_level(new_level)
-
     # need to shift down above rows
     if cleared_rows:
         for row_to_clear in cleared_rows:
@@ -191,6 +207,17 @@ def apply_tetromino():
             # Clear top row
             for col in range(GRID_WIDTH):
                 grid[0][col].fill = 0x000000
+
+    # Update lines and score
+    lines_eliminated = len(cleared_rows)
+    total_lines_eliminated += lines_eliminated
+    update_score(score + lines_eliminated)
+
+    # Check level update
+    new_level = total_lines_eliminated // 10 + 1
+    if new_level > level:
+        print("Next level")
+        update_level(new_level)
 
     reset_tetromino()
 
