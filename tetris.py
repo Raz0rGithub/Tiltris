@@ -261,10 +261,6 @@ switch2 = Debouncer(pin2)
 S1Timer = 0
 S2Timer = 0
 
-# ---- Audio ----
-# pyportal = PyPortal()
-# pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
-
 # ---- Application ----
 
 for row in range(10, GRID_HEIGHT):
@@ -279,9 +275,6 @@ while (not game_over):
     if (time.monotonic() > last_move_time + 0.3):
         last_move_time = time.monotonic()
         move(1, 0)
-
-    # if (time.monotonic() > first_move_time + 5.0):
-    #     pyportal.peripherals.stop_play()
 
     switch1.update()
     if switch1.fell:

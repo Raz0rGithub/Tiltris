@@ -1,28 +1,22 @@
-from adafruit_debouncer import Debouncer
-from adafruit_lis3mdl import LIS3MDL
-from busio import I2C
-from adafruit_lsm6ds.lsm6dsox import LSM6DSOX as LSM6DS
-import digitalio
-import busio
-import adafruit_rfm9x
 import time
 import board
 import displayio
+import digitalio
 from adafruit_pyportal import PyPortal
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 import terminalio
 import random
+from adafruit_debouncer import Debouncer
 
 display = board.DISPLAY
 display.rotation = 90
 main_group = displayio.Group()
 
-GRID_WIDTH = 16
+GRID_WIDTH = 14
 GRID_HEIGHT = 22
 BLOCK_SIZE = 20
 
-START_GRID
 
 COLORS = [
     0xf0f000,  # 0 Yellow
@@ -51,7 +45,7 @@ for row in range(GRID_HEIGHT):
     for col in range(GRID_WIDTH):
         # Create a rectangle for each block
         block = Rect(
-            col * BLOCK_SIZE,  # x pos
+            col * BLOCK_SIZE + 20,  # x pos
             row * BLOCK_SIZE,  # y pos
             BLOCK_SIZE,        # w
             BLOCK_SIZE,        # h
@@ -65,19 +59,49 @@ display.root_group = main_group
 
 score_text = label.Label(
     terminalio.FONT,
-    text="Score: 0",
+    text='Score: 0',
     color=0xFFFFFF,
     x=5,
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
+
+level_text = label.Label(
+    terminalio.FONT,
+    text='Level: 1',
+    color=0xFFFFFF,
+    x=GRID_WIDTH * BLOCK_SIZE - 15,
+    y=GRID_HEIGHT * BLOCK_SIZE + 10
+)
+
+# Left border
+main_group.append(Rect(
+    0,  # x pos
+    0,  # y pos
+    BLOCK_SIZE,  # w
+    GRID_HEIGHT * BLOCK_SIZE,  # h
+    fill=0xF4C2C2)  # baby pink
+)
+
+# Right border
+main_group.append(Rect(
+    GRID_WIDTH + 286,  # x pos
+    0,  # y pos
+    BLOCK_SIZE,  # w
+    GRID_HEIGHT * BLOCK_SIZE,  # h
+    fill=0xF4C2C2)  # baby pink
+)
+
+# Bottom border
 main_group.append(Rect(
     0,  # x pos
     22 * BLOCK_SIZE,  # y pos
-    GRID_WIDTH * BLOCK_SIZE,        # w
+    GRID_WIDTH * BLOCK_SIZE + 40,        # w
     BLOCK_SIZE,        # h
-    fill=0x808080)
+    fill=0xF4C2C2)  # baby pink
 )
+
 main_group.append(score_text)
+main_group.append(level_text)
 
 # Update color of a block at row, col
 
@@ -92,7 +116,7 @@ total_lines_eliminated = 0
 game_over = False
 tetromino = []
 tetromino_color = 0
-tetromino_offset = [-1, GRID_WIDTH // 2]
+tetromino_offset = [-1, GRID_WIDTH // 2 - 2]
 
 
 def reset_tetromino():
@@ -100,14 +124,14 @@ def reset_tetromino():
     tetromino = random.choice(TETROMINOS)[:]
     tetromino_index = TETROMINOS.index(tetromino)
     tetromino_color = COLORS[tetromino_index]
-    tetromino_offset = [-1, GRID_WIDTH // 2]
+    tetromino_offset = [-1, GRID_WIDTH // 2 - 2]
     game_over = any(not is_cell_free(row, col)
                     for (row, col) in get_tetromino_coords())
 
 
 def get_tetromino_coords():
     # Return coords of current tetromino as a list
-    return [(row + tetromino_offset[0], col + tetromino_offset[1]) for (row, col) in tetromino]
+    return [(row + tetromino_offset[0], col + tetromino_offset[1] + 1) for (row, col) in tetromino]
 
 
 def apply_tetromino():
@@ -128,13 +152,15 @@ def apply_tetromino():
         if n_filled_tiles == GRID_WIDTH:
             cleared_rows.append(row)
 
+    print(cleared_rows)
+
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
     score += lines_eliminated
 
     # need to shift down above rows
     if cleared_rows:
-        for row_to_clear in reversed(cleared_rows):
+        for row_to_clear in cleared_rows:
             # Shift down all rows above cleared row by one
             for row in range(row_to_clear, 0, -1):
                 for col in range(GRID_WIDTH):
@@ -156,13 +182,26 @@ def clear_tetromino():
             grid[row][col].fill = 0
 
 
+def move_right():
+    move(0, 1)
+
+
+def move_left():
+    move(0, -1)
+
+
+def drop():
+    while all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
+        move(1, 0)
+
+
 def move(d_row, d_col):
     global game_over, tetromino_offset
 
-    # Clear the previous position
+    # Clear prev position
     clear_tetromino()
 
-    # if free, move
+    # If free, move
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
         tetromino_offset = [tetromino_offset[0] +
                             d_row, tetromino_offset[1] + d_col]
@@ -173,21 +212,62 @@ def move(d_row, d_col):
 
     # Update the tetromino at the new position
     for (row, col) in get_tetromino_coords():
-        print((row, col))
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
 
-# ---- Button ----
+def rotate():
+    global game_over, tetromino, tetromino_offset
+    if game_over:
+        return
+    clear_tetromino()
+
+    ys = [row for (row, col) in tetromino]
+    xs = [col for (row, col) in tetromino]
+    size = max(max(ys) - min(ys), max(xs) - min(xs))
+    rotated_tetromino = [(col, size - row) for (row, col) in tetromino]
+    wallkick_offset = tetromino_offset[:]
+    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1])
+                       for (row, col) in rotated_tetromino]
+
+    min_x = min(col for row, col in tetromino_coord)
+    max_x = max(col for row, col in tetromino_coord)
+    max_y = max(row for row, col in tetromino_coord)
+    wallkick_offset[1] -= min(0, min_x)
+    wallkick_offset[1] += min(0, GRID_WIDTH - (1 + max_x))
+    wallkick_offset[0] += min(0, GRID_HEIGHT - (1 + max_y))
+
+    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1])
+                       for (row, col) in rotated_tetromino]
+    if all(is_cell_free(row, col) for (row, col) in tetromino_coord):
+        tetromino, tetromino_offset = rotated_tetromino, wallkick_offset
+
+    for (row, col) in get_tetromino_coords():
+        if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
+            grid[row][col].fill = tetromino_color
+
+
+# ---- Buttons ----
 pin1 = digitalio.DigitalInOut(board.D3)
 pin1.direction = digitalio.Direction.INPUT
 pin1.pull = digitalio.Pull.UP
 switch1 = Debouncer(pin1)
 
+pin2 = digitalio.DigitalInOut(board.D4)
+pin2.direction = digitalio.Direction.INPUT
+pin2.pull = digitalio.Pull.UP
+switch2 = Debouncer(pin2)
+
 S1Timer = 0
+S2Timer = 0
+
+# ---- Audio ----
+# pyportal = PyPortal()
+# pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
 
 # ---- Application ----
-for row in range(4, GRID_HEIGHT):
+
+for row in range(10, GRID_HEIGHT):
     for col in range(GRID_WIDTH):
         if col != 8 and col != 9:
             grid[row][col].fill = 0xf0f000
@@ -196,18 +276,29 @@ reset_tetromino()
 first_move_time = time.monotonic()
 last_move_time = time.monotonic()
 while (not game_over):
-    if (time.monotonic() > last_move_time + 0.5):
+    if (time.monotonic() > last_move_time + 0.3):
         last_move_time = time.monotonic()
-        print(tetromino_offset)
         move(1, 0)
+
+    # if (time.monotonic() > first_move_time + 5.0):
+    #     pyportal.peripherals.stop_play()
 
     switch1.update()
     if switch1.fell:
         S1Timer = time.monotonic()
     if switch1.rose:
-        if time.monotonic() > S1Timer + 0.5:
+        if time.monotonic() > S1Timer + 0.3:
             move_left()
         else:
             move_right()
+
+    switch2.update()
+    if switch2.fell:
+        S2Timer = time.monotonic()
+    if switch2.rose:
+        if time.monotonic() > S2Timer + 0.3:
+            drop()
+        else:
+            rotate()
 
 print('game over!')
