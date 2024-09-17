@@ -64,7 +64,7 @@ score_text = label.Label(
     x=5,
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
-        
+
 level_text = label.Label(
     terminalio.FONT,
     text='Level: 1',
@@ -73,13 +73,13 @@ level_text = label.Label(
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
 
-# Left border 
+# Left border
 main_group.append(Rect(
     0,  # x pos
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2) # baby pink
+    fill=0xF4C2C2)  # baby pink
 )
 
 # Right border
@@ -88,7 +88,7 @@ main_group.append(Rect(
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2) # baby pink
+    fill=0xF4C2C2)  # baby pink
 )
 
 # Bottom border
@@ -97,15 +97,18 @@ main_group.append(Rect(
     22 * BLOCK_SIZE,  # y pos
     GRID_WIDTH * BLOCK_SIZE + 40,        # w
     BLOCK_SIZE,        # h
-    fill=0xF4C2C2) # baby pink
+    fill=0xF4C2C2)  # baby pink
 )
 
 main_group.append(score_text)
 main_group.append(level_text)
 
 # Update color of a block at row, col
+
+
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
+
 
 score = 0
 level = 0
@@ -114,6 +117,7 @@ game_over = False
 tetromino = []
 tetromino_color = 0
 tetromino_offset = [-1, GRID_WIDTH // 2 - 2]
+
 
 def reset_tetromino():
     global tetromino, tetromino_color, tetromino_offset, game_over
@@ -124,9 +128,11 @@ def reset_tetromino():
     game_over = any(not is_cell_free(row, col)
                     for (row, col) in get_tetromino_coords())
 
+
 def get_tetromino_coords():
     # Return coords of current tetromino as a list
     return [(row + tetromino_offset[0], col + tetromino_offset[1] + 1) for (row, col) in tetromino]
+
 
 def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
@@ -165,23 +171,29 @@ def apply_tetromino():
 
     reset_tetromino()
 
+
 def is_cell_free(row, col):
     return row < GRID_HEIGHT and 0 <= col < GRID_WIDTH and (row < 0 or grid[row][col].fill == 0)
+
 
 def clear_tetromino():
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = 0
 
+
 def move_right():
     move(0, 1)
+
 
 def move_left():
     move(0, -1)
 
+
 def drop():
     while all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
         move(1, 0)
+
 
 def move(d_row, d_col):
     global game_over, tetromino_offset
@@ -203,6 +215,7 @@ def move(d_row, d_col):
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
+
 def rotate():
     global game_over, tetromino, tetromino_offset
     if game_over:
@@ -214,8 +227,9 @@ def rotate():
     size = max(max(ys) - min(ys), max(xs) - min(xs))
     rotated_tetromino = [(col, size - row) for (row, col) in tetromino]
     wallkick_offset = tetromino_offset[:]
-    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1]) for (row, col) in rotated_tetromino]
-    
+    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1])
+                       for (row, col) in rotated_tetromino]
+
     min_x = min(col for row, col in tetromino_coord)
     max_x = max(col for row, col in tetromino_coord)
     max_y = max(row for row, col in tetromino_coord)
@@ -223,15 +237,17 @@ def rotate():
     wallkick_offset[1] += min(0, GRID_WIDTH - (1 + max_x))
     wallkick_offset[0] += min(0, GRID_HEIGHT - (1 + max_y))
 
-    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1]) for (row, col) in rotated_tetromino]
+    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1])
+                       for (row, col) in rotated_tetromino]
     if all(is_cell_free(row, col) for (row, col) in tetromino_coord):
         tetromino, tetromino_offset = rotated_tetromino, wallkick_offset
-    
+
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
-# ---- Button ----
+
+# ---- Buttons ----
 pin1 = digitalio.DigitalInOut(board.D3)
 pin1.direction = digitalio.Direction.INPUT
 pin1.pull = digitalio.Pull.UP
@@ -243,12 +259,11 @@ pin2.pull = digitalio.Pull.UP
 switch2 = Debouncer(pin2)
 
 S1Timer = 0
+S2Timer = 0
 
 # ---- Audio ----
-pyportal = PyPortal()
-
-# Play the 'Tetris.wav' file in a non-blocking way
-pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
+# pyportal = PyPortal()
+# pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
 
 # ---- Application ----
 
@@ -269,7 +284,6 @@ while (not game_over):
         pyportal.peripherals.stop_play()
 
     switch1.update()
-    switch2.update()
     if switch1.fell:
         S1Timer = time.monotonic()
     if switch1.rose:
@@ -277,7 +291,14 @@ while (not game_over):
             move_left()
         else:
             move_right()
+
+    switch2.update()
     if switch2.fell:
-        rotate()
+        S2Timer = time.monotonic()
+    if switch2.rose:
+        if time.monotonic() > S2Timer + 0.3:
+            drop()
+        else:
+            rotate()
 
 print('game over!')
