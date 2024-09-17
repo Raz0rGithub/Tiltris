@@ -117,12 +117,11 @@ def update_score(new_score):
 
 def update_level(new_level):
     global level, drop_delay
-    previous_level = 0
-    if new_level > previous_level:
-        level = new_level
-        previous_level = new_level
-        drop_delay = 0.5 * pow(0.75, level - 1)
-        start_flashing()
+    level = new_level
+    level_text.text = f'Level: {level}'
+    drop_delay = 0.5 * pow(0.75, level - 1)
+    start_flashing()
+
 
 def start_flashing():
     border_rects = [
@@ -152,7 +151,7 @@ def update_block_color(row, col, color_index):
 
 
 score = 0
-level = 0
+level = 1
 drop_delay = 0.5
 total_lines_eliminated = 0
 game_over = False
