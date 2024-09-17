@@ -213,20 +213,14 @@ pin1.direction = digitalio.Direction.INPUT
 pin1.pull = digitalio.Pull.UP
 switch1 = Debouncer(pin1)
 
-
-def button_1_short_press():
-    move_left()
-
-
-def button_1_long_press():
-    move_right()
-
-
 S1Timer = 0
 
 # ---- Audio ----
-song = '/Tetris.wav'
-PyPortal.play_file(song)
+pyportal = PyPortal()
+
+# Play the 'Tetris.wav' file in a non-blocking way
+pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
+
 # ---- Application ----
 
 for row in range(10, GRID_HEIGHT):
@@ -242,11 +236,14 @@ while (not game_over):
         last_move_time = time.monotonic()
         move(1, 0)
 
+    if (time.monotonic() > first_move_time + 5.0):
+        pyportal.peripherals.stop_play()
+
     switch1.update()
     if switch1.fell:
         S1Timer = time.monotonic()
     if switch1.rose:
-        if time.monotonic() > S1Timer + 0.5:
+        if time.monotonic() > S1Timer + 0.3:
             move_left()
         else:
             move_right()
