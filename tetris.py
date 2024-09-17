@@ -8,6 +8,7 @@ from adafruit_display_text import label
 import terminalio
 import random
 from adafruit_debouncer import Debouncer
+pyportal = PyPortal()
 
 display = board.DISPLAY
 display.rotation = 90
@@ -172,8 +173,6 @@ def apply_tetromino():
     if new_level > level:
         print("Next level")
         update_level(new_level)
-    else:
-        print("Not yet!")
 
     # need to shift down above rows
     if cleared_rows:
@@ -205,11 +204,6 @@ def move_right():
 
 def move_left():
     move(0, -1)
-
-
-def drop():
-    while all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
-        move(1, 0)
 
 def drop():
     global game_over, tetromino_offset
@@ -308,11 +302,13 @@ for row in range(10, GRID_HEIGHT):
 reset_tetromino()
 first_move_time = time.monotonic()
 last_move_time = time.monotonic()
+pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
+
 while (not game_over):
-    if (time.monotonic() > last_move_time + 0.3):
+    if (time.monotonic() > last_move_time + 0.35):
         last_move_time = time.monotonic()
         move(1, 0)
-
+        
     switch1.update()
     if switch1.fell:
         S1Timer = time.monotonic()
