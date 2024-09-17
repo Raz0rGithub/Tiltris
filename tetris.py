@@ -18,7 +18,6 @@ GRID_HEIGHT = 22
 BLOCK_SIZE = 20
 
 
-
 COLORS = [
     0xf0f000,  # 0 Yellow
     0xf0a000,  # 1 Orange
@@ -72,17 +71,17 @@ main_group.append(Rect(
     22 * BLOCK_SIZE,  # y pos
     GRID_WIDTH * BLOCK_SIZE + 40,        # w
     BLOCK_SIZE,        # h
-    fill=0xF4C2C2) # baby pink
+    fill=0xF4C2C2)  # baby pink
 )
 main_group.append(score_text)
 
-# Left Rect 
+# Left Rect
 main_group.append(Rect(
     0,  # x pos
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2) # baby pink
+    fill=0xF4C2C2)  # baby pink
 )
 
 # Right Rect
@@ -91,12 +90,15 @@ main_group.append(Rect(
     0,  # y pos
     BLOCK_SIZE,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
-    fill=0xF4C2C2) # baby pink
+    fill=0xF4C2C2)  # baby pink
 )
 
 # Update color of a block at row, col
+
+
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
+
 
 score = 0
 level = 0
@@ -113,7 +115,8 @@ def reset_tetromino():
     tetromino_index = TETROMINOS.index(tetromino)
     tetromino_color = COLORS[tetromino_index]
     tetromino_offset = [-1, GRID_WIDTH // 2 - 2]
-    game_over = any(not is_cell_free(row, col) for (row, col) in get_tetromino_coords())
+    game_over = any(not is_cell_free(row, col)
+                    for (row, col) in get_tetromino_coords())
 
 
 def get_tetromino_coords():
@@ -138,7 +141,7 @@ def apply_tetromino():
                 n_filled_tiles += 1
         if n_filled_tiles == GRID_WIDTH:
             cleared_rows.append(row)
-            
+
     print(cleared_rows)
 
     lines_eliminated = len(cleared_rows)
@@ -169,15 +172,19 @@ def clear_tetromino():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = 0
 
+
 def move_right():
     move(0, 1)
 
+
 def move_left():
     move(0, -1)
-    
+
+
 def drop():
     while all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
         move(1, 0)
+
 
 def move(d_row, d_col):
     global game_over, tetromino_offset
@@ -187,7 +194,8 @@ def move(d_row, d_col):
 
     # if free, move
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
-        tetromino_offset = [tetromino_offset[0] + d_row, tetromino_offset[1] + d_col]
+        tetromino_offset = [tetromino_offset[0] +
+                            d_row, tetromino_offset[1] + d_col]
     elif d_row == 1 and d_col == 0:
         game_over = any(row < 0 for (row, col) in get_tetromino_coords())
         if not game_over:
@@ -197,7 +205,6 @@ def move(d_row, d_col):
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
-
 
 
 # ---- Button ----
@@ -217,6 +224,9 @@ def button_1_long_press():
 
 S1Timer = 0
 
+# ---- Audio ----
+song = '/Tetris.wav'
+PyPortal.play_file(song)
 # ---- Application ----
 
 for row in range(10, GRID_HEIGHT):
