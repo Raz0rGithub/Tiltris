@@ -94,11 +94,8 @@ main_group.append(Rect(
 )
 
 # Update color of a block at row, col
-
-
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
-
 
 score = 0
 level = 0
@@ -107,7 +104,6 @@ game_over = False
 tetromino = []
 tetromino_color = 0
 tetromino_offset = [-1, GRID_WIDTH // 2 - 2]
-
 
 def reset_tetromino():
     global tetromino, tetromino_color, tetromino_offset, game_over
@@ -118,11 +114,9 @@ def reset_tetromino():
     game_over = any(not is_cell_free(row, col)
                     for (row, col) in get_tetromino_coords())
 
-
 def get_tetromino_coords():
     # Return coords of current tetromino as a list
     return [(row + tetromino_offset[0], col + tetromino_offset[1] + 1) for (row, col) in tetromino]
-
 
 def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
@@ -147,7 +141,6 @@ def apply_tetromino():
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
     score += lines_eliminated
-#     score_text.text += 1
 
     # need to shift down above rows
     if cleared_rows:
@@ -162,37 +155,31 @@ def apply_tetromino():
 
     reset_tetromino()
 
-
 def is_cell_free(row, col):
     return row < GRID_HEIGHT and 0 <= col < GRID_WIDTH and (row < 0 or grid[row][col].fill == 0)
-
 
 def clear_tetromino():
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = 0
 
-
 def move_right():
     move(0, 1)
 
-
 def move_left():
     move(0, -1)
-
 
 def drop():
     while all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
         move(1, 0)
 
-
 def move(d_row, d_col):
     global game_over, tetromino_offset
 
-    # Clear the previous position
+    # Clear prev position
     clear_tetromino()
 
-    # if free, move
+    # If free, move
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
         tetromino_offset = [tetromino_offset[0] +
                             d_row, tetromino_offset[1] + d_col]
@@ -206,12 +193,44 @@ def move(d_row, d_col):
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
+def rotate():
+    global game_over, tetromino, tetromino_offset
+    if game_over:
+        return
+    clear_tetromino()
+
+    ys = [row for (row, col) in tetromino]
+    xs = [col for (row, col) in tetromino]
+    size = max(max(ys) - min(ys), max(xs) - min(xs))
+    rotated_tetromino = [(col, size - row) for (row, col) in tetromino]
+    wallkick_offset = tetromino_offset[:]
+    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1]) for (row, col) in rotated_tetromino]
+    
+    min_x = min(col for row, col in tetromino_coord)
+    max_x = max(col for row, col in tetromino_coord)
+    max_y = max(row for row, col in tetromino_coord)
+    wallkick_offset[1] -= min(0, min_x)
+    wallkick_offset[1] += min(0, GRID_WIDTH - (1 + max_x))
+    wallkick_offset[0] += min(0, GRID_HEIGHT - (1 + max_y))
+
+    tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1]) for (row, col) in rotated_tetromino]
+    if all(is_cell_free(row, col) for (row, col) in tetromino_coord):
+        tetromino, tetromino_offset = rotated_tetromino, wallkick_offset
+    
+    for (row, col) in get_tetromino_coords():
+        if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
+            grid[row][col].fill = tetromino_color
 
 # ---- Button ----
 pin1 = digitalio.DigitalInOut(board.D3)
 pin1.direction = digitalio.Direction.INPUT
 pin1.pull = digitalio.Pull.UP
 switch1 = Debouncer(pin1)
+
+pin2 = digitalio.DigitalInOut(board.D4)
+pin2.direction = digitalio.Direction.INPUT
+pin2.pull = digitalio.Pull.UP
+switch2 = Debouncer(pin2)
 
 S1Timer = 0
 
@@ -240,6 +259,7 @@ while (not game_over):
         pyportal.peripherals.stop_play()
 
     switch1.update()
+    switch2.update()
     if switch1.fell:
         S1Timer = time.monotonic()
     if switch1.rose:
@@ -247,5 +267,7 @@ while (not game_over):
             move_left()
         else:
             move_right()
+    if switch2.fell:
+        rotate()
 
 print('game over!')
