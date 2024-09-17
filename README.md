@@ -10,7 +10,7 @@ To do 9/17:
 - ~~Audio~~
 - ~~Game over screen & reset screen w/ high score, etc~~
 - Gloves??
-- Border flashes white a few times for each level up
+- ~~Border flashes white a few times for each level up~~
 
 
 To do once we are done with everything:
