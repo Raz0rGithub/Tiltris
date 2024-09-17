@@ -321,24 +321,9 @@ def rotate():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
-
-# ---- Buttons ----
-# pin1 = digitalio.DigitalInOut(board.D3)
-# pin1.direction = digitalio.Direction.INPUT
-# pin1.pull = digitalio.Pull.UP
-# switch1 = Debouncer(pin1)
-
-# pin2 = digitalio.DigitalInOut(board.D4)
-# pin2.direction = digitalio.Direction.INPUT
-# pin2.pull = digitalio.Pull.UP
-# switch2 = Debouncer(pin2)
-
-# S1Timer = 0
-# S2Timer = 0
-
 # ---- Application ----
 
-for row in range(8, GRID_HEIGHT):
+for row in range(19, GRID_HEIGHT):
     for col in range(GRID_WIDTH):
         if col != 8 and col != 9:
             grid[row][col].fill = 0xf0f000
@@ -347,10 +332,10 @@ reset_tetromino()
 first_move_time = time.monotonic()
 last_move_time = time.monotonic()
 # pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
-
+print("listening...")
 while not game_over:
-    print("listening...")
     packet = rfm9x.receive(timeout=0.4)
+    packet_text = ""
     if not packet is None:
         packet_text = str(packet, 'ascii')
         print("Received: {0}".format(packet_text))
@@ -368,9 +353,8 @@ while not game_over:
     elif packet_text == "drop()":
         drop()
         
-    elif packet_text == "rotate()":
+    elif packet_text == "rotation()":
         rotate()
-
 
 def game_over_screen():
     for row in range(GRID_HEIGHT):
