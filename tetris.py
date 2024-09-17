@@ -31,12 +31,12 @@ COLORS = [
 
 TETROMINOS = [
     [(0, 0), (0, 1), (1, 0), (1, 1)],  # 0 O Yellow
-#     [(0, 0), (0, 1), (1, 1), (2, 1)],  # 1 L Orange
-#     [(0, 1), (1, 1), (2, 1), (2, 0)],  # 2 J Navy
-#     [(0, 1), (1, 0), (1, 1), (2, 0)],  # 3 Z Green
-#     [(0, 1), (1, 0), (1, 1), (2, 1)],  # 4 T Purple
-#     [(0, 0), (1, 0), (1, 1), (2, 1)],  # 5 S Red
-#     [(0, 1), (1, 1), (2, 1), (3, 1)],  # 6 I Cyan
+    [(0, 0), (0, 1), (1, 1), (2, 1)],  # 1 L Orange
+    [(0, 1), (1, 1), (2, 1), (2, 0)],  # 2 J Navy
+    [(0, 1), (1, 0), (1, 1), (2, 0)],  # 3 Z Green
+    [(0, 1), (1, 0), (1, 1), (2, 1)],  # 4 T Purple
+    [(0, 0), (1, 0), (1, 1), (2, 1)],  # 5 S Red
+    [(0, 1), (1, 1), (2, 1), (3, 1)],  # 6 I Cyan
 ]
 
 # Create the Tetris grid
@@ -105,10 +105,13 @@ main_group.append(score_text)
 main_group.append(level_text)
 
 # Update score and level
+
+
 def update_score(new_score):
     global score
     score = new_score
     score_text.text = f'Score: {score}'
+
 
 def update_level(new_level):
     global level, drop_delay
@@ -117,6 +120,8 @@ def update_level(new_level):
     drop_delay = 0.5 * pow(0.75, level - 1)
 
 # Update color of a block at row, col
+
+
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
 
@@ -168,8 +173,8 @@ def apply_tetromino():
 
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
-    update_score(score + lines_eliminated * 5)
-    
+    update_score(score + lines_eliminated)
+
     # Check level update
     new_level = score // 10 + 1
     if new_level > level:
@@ -207,13 +212,14 @@ def move_right():
 def move_left():
     move(0, -1)
 
+
 def drop():
     global game_over, tetromino_offset
     clear_tetromino()
     not_applied = True
 
     while not_applied:
-                
+
         # If right below is free, update offset
         if all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
             tetromino_offset = [tetromino_offset[0] + 1, tetromino_offset[1]]
@@ -223,10 +229,11 @@ def drop():
             if not game_over:
                 apply_tetromino()
                 not_applied = False
-                
+
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
+
 
 def move(d_row, d_col):
     global game_over, tetromino_offset
@@ -310,7 +317,7 @@ while (not game_over):
     if (time.monotonic() > last_move_time + drop_delay):
         last_move_time = time.monotonic()
         move(1, 0)
-        
+
     switch1.update()
     if switch1.fell:
         S1Timer = time.monotonic()
@@ -341,8 +348,8 @@ def game_over_screen():
         terminalio.FONT,
         text='Game Over!',
         color=0xFF0000,  # Red
-        x = (GRID_WIDTH * BLOCK_SIZE - 15) // 2,
-        y = (GRID_HEIGHT * BLOCK_SIZE) // 2
+        x=(GRID_WIDTH * BLOCK_SIZE - 15) // 2,
+        y=(GRID_HEIGHT * BLOCK_SIZE) // 2
     )
     main_group.append(game_over_text)
 
@@ -350,9 +357,9 @@ def game_over_screen():
     final_score_text = label.Label(
         terminalio.FONT,
         text=f'Final Score: {score}',
-        color=0xFFFFFF, # Red
-        x = (GRID_WIDTH * BLOCK_SIZE - 50) // 2,  
-        y = (GRID_HEIGHT * BLOCK_SIZE) // 2 + 20
+        color=0xFFFFFF,  # Red
+        x=(GRID_WIDTH * BLOCK_SIZE - 50) // 2,
+        y=(GRID_HEIGHT * BLOCK_SIZE) // 2 + 20
     )
     main_group.append(final_score_text)
 
@@ -360,11 +367,12 @@ def game_over_screen():
     final_level_text = label.Label(
         terminalio.FONT,
         text=f'Final Level: {level}',
-        color=0xFFFFFF, # Red
-        x = (GRID_WIDTH * BLOCK_SIZE - 50) // 2,  
-        y = (GRID_HEIGHT * BLOCK_SIZE) // 2 + 40
+        color=0xFFFFFF,  # Red
+        x=(GRID_WIDTH * BLOCK_SIZE - 50) // 2,
+        y=(GRID_HEIGHT * BLOCK_SIZE) // 2 + 40
     )
     main_group.append(final_level_text)
+
 
 game_over_screen()
 
