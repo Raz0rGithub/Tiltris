@@ -3,9 +3,9 @@
 To do 9/17:
 
 - LoRa
-- Track/update score
+- ~~Track/update score~~
 - Track/update levels (speed)
-- Rotations
+- ~~Rotations~~
 - Figure out battery connection for PyPortal
 - Audio
 - Game over screen & reset screen w/ high score, etc
