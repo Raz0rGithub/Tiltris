@@ -329,4 +329,45 @@ while (not game_over):
         else:
             rotate()
 
+
+def game_over_screen():
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            # Make the screen all black
+            grid[row][col].fill = 0x000000
+
+    # Show "Game Over!" message
+    game_over_text = label.Label(
+        terminalio.FONT,
+        text='Game Over!',
+        color=0xFF0000,  # Red
+        x = (GRID_WIDTH * BLOCK_SIZE - 15) // 2,
+        y = (GRID_HEIGHT * BLOCK_SIZE) // 2
+    )
+    main_group.append(game_over_text)
+
+    # Show final score
+    final_score_text = label.Label(
+        terminalio.FONT,
+        text=f'Final Score: {score}',
+        color=0xFFFFFF, # Red
+        x = (GRID_WIDTH * BLOCK_SIZE - 50) // 2,  
+        y = (GRID_HEIGHT * BLOCK_SIZE) // 2 + 20
+    )
+    main_group.append(final_score_text)
+
+    # Show final level
+    final_level_text = label.Label(
+        terminalio.FONT,
+        text=f'Final Level: {level}',
+        color=0xFFFFFF, # Red
+        x = (GRID_WIDTH * BLOCK_SIZE - 50) // 2,  
+        y = (GRID_HEIGHT * BLOCK_SIZE) // 2 + 40
+    )
+    main_group.append(final_level_text)
+
+game_over_screen()
+
+time.sleep(10)
+
 print('game over!')
