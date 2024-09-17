@@ -104,23 +104,30 @@ main_group.append(score_text)
 main_group.append(level_text)
 
 # Update score and level
+
+
 def update_score(new_score):
     global score
     score = new_score
     score_text.text = f'Score: {score}'
 
+
 def update_level(new_level):
     global level
     level = new_level
     level_text.text = f'Level: {level}'
+    drop_delay = 0.5 * pow(0.75, level - 1)
 
 # Update color of a block at row, col
+
+
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
 
 
 score = 0
 level = 0
+drop_delay = 0.5
 total_lines_eliminated = 0
 game_over = False
 tetromino = []
@@ -166,7 +173,7 @@ def apply_tetromino():
     lines_eliminated = len(cleared_rows)
     total_lines_eliminated += lines_eliminated
     update_score(score + lines_eliminated)
-    
+
     # Check level update
     new_level = total_lines_eliminated // 10 + 1
     if new_level > level:
@@ -211,13 +218,14 @@ def drop():
     while all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
         move(1, 0)
 
+
 def drop():
     global game_over, tetromino_offset
     clear_tetromino()
     not_applied = True
 
     while not_applied:
-                
+
         # If right below is free, update offset
         if all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
             tetromino_offset = [tetromino_offset[0] + 1, tetromino_offset[1]]
@@ -227,10 +235,11 @@ def drop():
             if not game_over:
                 apply_tetromino()
                 not_applied = False
-                
+
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
+
 
 def move(d_row, d_col):
     global game_over, tetromino_offset
@@ -309,7 +318,7 @@ reset_tetromino()
 first_move_time = time.monotonic()
 last_move_time = time.monotonic()
 while (not game_over):
-    if (time.monotonic() > last_move_time + 0.3):
+    if (time.monotonic() > last_move_time + drop_delay):
         last_move_time = time.monotonic()
         move(1, 0)
 
