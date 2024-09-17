@@ -194,6 +194,26 @@ def drop():
     while all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
         move(1, 0)
 
+def drop():
+    global game_over, tetromino_offset
+    clear_tetromino()
+    not_applied = True
+
+    while not_applied:
+                
+        # If right below is free, update offset
+        if all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
+            tetromino_offset = [tetromino_offset[0] + 1, tetromino_offset[1]]
+        # If not free, apply directly
+        else:
+            game_over = any(row < 0 for (row, col) in get_tetromino_coords())
+            if not game_over:
+                apply_tetromino()
+                not_applied = False
+                
+    for (row, col) in get_tetromino_coords():
+        if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
+            grid[row][col].fill = tetromino_color
 
 def move(d_row, d_col):
     global game_over, tetromino_offset
