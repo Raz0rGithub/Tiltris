@@ -276,7 +276,7 @@ def hard_drop():
 
 def move(d_row, d_col):
     global game_over, tetromino_offset
-
+    
     # Clear prev position
     clear_tetromino()
 
@@ -293,8 +293,7 @@ def move(d_row, d_col):
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
-
-
+    
 def rotate():
     global game_over, tetromino, tetromino_offset
     if game_over:
@@ -345,11 +344,6 @@ while not game_over:
         packet_text = str(packet, 'ascii')
         print("Received: {0}".format(packet_text))
 
-    if time.monotonic() > last_move_time + drop_delay:
-        last_move_time = time.monotonic()
-        move(1, 0)
-        drop_delay = base_drop_delay
-
     if packet_text == "move_left()":
         move_left()
         drop_delay = base_drop_delay
@@ -359,7 +353,7 @@ while not game_over:
         drop_delay = base_drop_delay
 
     elif packet_text == "soft_drop()":
-        drop_delay = base_drop_delay/2
+        drop_delay = base_drop_delay/4
 
     elif packet_text == "hard_drop()":
         hard_drop()
@@ -369,7 +363,11 @@ while not game_over:
         rotate()
         drop_delay = base_drop_delay
 
-
+    if time.monotonic() > last_move_time + drop_delay:
+        print(drop_delay)
+        last_move_time = time.monotonic()
+        move(1, 0)
+        
 def game_over_screen():
     for row in range(GRID_HEIGHT):
         for col in range(GRID_WIDTH):
