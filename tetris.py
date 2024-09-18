@@ -313,7 +313,7 @@ def rotate():
     max_x = max(col for row, col in tetromino_coord)
     max_y = max(row for row, col in tetromino_coord)
     wallkick_offset[1] -= min(0, min_x)
-    wallkick_offset[1] += min(0, GRID_WIDTH - (1 + max_x))
+    wallkick_offset[1] += min(0, GRID_WIDTH - (2 + max_x))
     wallkick_offset[0] += min(0, GRID_HEIGHT - (1 + max_y))
 
     tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1])
