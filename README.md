@@ -3,7 +3,7 @@
 To do 9/18:
 
 - Glove tolerances
-- Update block size throughout + grid dims
+- ~~Update block size throughout + grid dims~~
 - Hard/soft dropping (tilt degree)
 - Mount on glove, will need to rotate gyro
   - velcro
