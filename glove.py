@@ -100,7 +100,7 @@ while start is False:
             start = True
 
 # MAIN EXECUTE LOOP
-dT = 0.033  # Clock Speed: 33ms / 30 hz / 30 times a second
+dT = 0.0166  # Clock Speed: 16.6ms / 60 hz / 60 times a second
 cooldown = 0
 position = 7
 tilt_cooldown = 0
@@ -114,7 +114,7 @@ while True:
     if switch1.fell:
         S1Timer = 0
     if switch1.rose:
-        if S1Timer > 30:
+        if S1Timer > 60:
             button_1_long_press()
         else:
             button_1_short_press()
@@ -134,7 +134,7 @@ while True:
         if switch2.fell:
             S2Timer = 0
         if switch2.rose:
-            if S2Timer > 30:
+            if S2Timer > 60:
                 button_2_long_press()
             else:
                 button_2_short_press()
@@ -150,21 +150,28 @@ while True:
         tilt_cooldown -= 1
 
         if not x_tilt and cooldown < 0:
-            if ax < -0.9:
+            if ax < -1.0:
                 print("move_right()")
                 rfm9x.send('move_right()')
                 position += 1
                 if position > 15:
                     position = 15
-                cooldown = 6
 
-            if ax > 0.9:
+                if ax < -2.0:
+                    cooldown = 8
+                else:
+                    cooldown = 16
+
+            if ax > 1.0:
                 print("move_left()")
                 rfm9x.send('move_left()')
                 position -= 1
                 if position < 0:
                     position = 0
-                cooldown = 6
+                if ax > 2.0:
+                    cooldown = 8
+                else:
+                    cooldown = 16
 
         if tilt_cooldown < 0:
             if ay > 2.5:
@@ -173,42 +180,20 @@ while True:
                 rotation += 1
                 if rotation > 3:
                     rotation = 0
-                tilt_cooldown = 10
 
-            if ay < -5.0:
+                if ay > 4:
+                    tilt_cooldown = 20
+                else:
+                    tilt_cooldown = 40
+
+            if ay < -6.0:
                 print("hard_drop()")
                 rfm9x.send('hard_drop()')
-                tilt_cooldown = 10
+                tilt_cooldown = 30
 
             elif ay < -3.0:
                 print("soft_drop()")
                 rfm9x.send('soft_drop()')
-                tilt_cooldown = 10
-
-        output = ""
-        for x in range(0, position):
-            output += "[ ]"
-
-        if rotation == 0:
-            output += "[|]"
-        elif rotation == 1:
-            output += "[/]"
-        elif rotation == 2:
-            output += "[-]"
-        elif rotation == 3:
-            output += "[\\]"
-
-        for x in range(position, 16):
-            output += "[ ]"
-
-        # print(
-        #     "x_Tilt = {0}   Acceleration: X:{1:7.2f}, Y:{2:7.2f}, Z:{3:7.2f} m/s^2".format(
-        #         x_tilt, ax, ay, az, *gyro
-        #     )
-        # )
-        # print("Tilt = {0}   Gyro: X:{1:7.2f}, Y:{2:7.2f}, Z:{3:7.2f} rad/s"
-        #       .format(tilt, ax, ay, az, *gyro))
-        # print("Tilt = {0} Cooldown = {1}".format(x_tilt, cooldown))
-        print(output)
+                tilt_cooldown = 5
 
     time.sleep(dT)
