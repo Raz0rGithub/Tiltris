@@ -28,6 +28,15 @@ GRID_WIDTH = 12
 GRID_HEIGHT = 20
 BLOCK_SIZE = 23
 
+score = 0
+level = 1
+base_drop_delay = 0.5
+drop_delay = 0.5
+total_lines_eliminated = 0
+game_over = False
+tetromino = []
+tetromino_color = 0
+tetromino_offset = [-1, GRID_WIDTH // 2 - 2]
 
 COLORS = [
     0xf0f000,  # 0 Yellow
@@ -158,17 +167,6 @@ def start_flashing():
 # Update color of a block at row, col
 def update_block_color(row, col, color_index):
     grid[row][col].fill = COLORS[color_index]
-
-
-score = 0
-level = 1
-base_drop_delay = 0.5
-drop_delay = 0.5
-total_lines_eliminated = 0
-game_over = False
-tetromino = []
-tetromino_color = 0
-tetromino_offset = [-1, GRID_WIDTH // 2 - 2]
 
 
 def reset_tetromino():
@@ -365,66 +363,59 @@ def game_over_screen():
 
 # ---- Application ----
 
+for row in range(19, GRID_HEIGHT):
+    for col in range(GRID_WIDTH):
+        if col != 8 and col != 9:
+            grid[row][col].fill = 0xf0f000
 
-def run_game():
-    for row in range(19, GRID_HEIGHT):
-        for col in range(GRID_WIDTH):
-            if col != 8 and col != 9:
-                grid[row][col].fill = 0xf0f000
+reset_tetromino()
+last_move_time = time.monotonic()
+# pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
+print("listening...")
+on = True
 
-    reset_tetromino()
-    last_move_time = time.monotonic()
-    # pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
-    print("listening...")
-    on = True
-    while not game_over:
-        packet = rfm9x.receive(timeout=0.4)
-        packet_text = ""
-        if not packet is None:
-            packet_text = str(packet, 'ascii')
-            print("Received: {0}".format(packet_text))
+while not game_over:
+    packet = rfm9x.receive(timeout=0.4)
+    packet_text = ""
+    if not packet is None:
+        packet_text = str(packet, 'ascii')
+        print("Received: {0}".format(packet_text))
 
-        if packet_text == "on_off()":
-            on = not on
+    if packet_text == "on_off()":
+        on = not on
 
-        elif packet_text == "reset()":
-            game_over_screen()
-            time.sleep(1)
-            return
+    # elif packet_text == "reset()":
+#         game_over_screen()
+#         time.sleep(1)
+#         return
 
-        if on:
-            if packet_text == "move_left()":
-                move_left()
-                drop_delay = base_drop_delay
+    if on:
+        if packet_text == "move_left()":
+            move_left()
+            drop_delay = base_drop_delay
 
-            elif packet_text == "move_right()":
-                move_right()
-                drop_delay = base_drop_delay
+        elif packet_text == "move_right()":
+            move_right()
+            drop_delay = base_drop_delay
 
-            elif packet_text == "soft_drop()":
-                drop_delay = base_drop_delay/4
+        elif packet_text == "soft_drop()":
+            drop_delay = base_drop_delay/4
 
-            elif packet_text == "hard_drop()":
-                hard_drop()
-                drop_delay = base_drop_delay
+        elif packet_text == "hard_drop()":
+            hard_drop()
+            drop_delay = base_drop_delay
 
-            elif packet_text == "rotation()":
-                rotate()
-                drop_delay = base_drop_delay
+        elif packet_text == "rotation()":
+            rotate()
+            drop_delay = base_drop_delay
 
-            if time.monotonic() > last_move_time + drop_delay:
-                print(drop_delay)
-                last_move_time = time.monotonic()
-                move(1, 0)
+        if time.monotonic() > last_move_time + drop_delay:
+            print(drop_delay)
+            last_move_time = time.monotonic()
+            move(1, 0)
 
-    game_over_screen()
+game_over_screen()
 
-    time.sleep(100)
+time.sleep(100)
 
-    print('game over!')
-
-
-while True:
-    run_game()
-
-print('end of execution')
+print('game over!')
