@@ -366,54 +366,65 @@ def game_over_screen():
 # ---- Application ----
 
 
-for row in range(19, GRID_HEIGHT):
-    for col in range(GRID_WIDTH):
-        if col != 8 and col != 9:
-            grid[row][col].fill = 0xf0f000
+def run_game():
+    for row in range(19, GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            if col != 8 and col != 9:
+                grid[row][col].fill = 0xf0f000
 
-reset_tetromino()
-first_move_time = time.monotonic()
-last_move_time = time.monotonic()
-# pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
-print("listening...")
-on = True
-while not game_over:
-    packet = rfm9x.receive(timeout=0.4)
-    packet_text = ""
-    if not packet is None:
-        packet_text = str(packet, 'ascii')
-        print("Received: {0}".format(packet_text))
+    reset_tetromino()
+    last_move_time = time.monotonic()
+    # pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
+    print("listening...")
+    on = True
+    while not game_over:
+        packet = rfm9x.receive(timeout=0.4)
+        packet_text = ""
+        if not packet is None:
+            packet_text = str(packet, 'ascii')
+            print("Received: {0}".format(packet_text))
 
-    if packet_text == "on_off()":
-        on = not on
+        if packet_text == "on_off()":
+            on = not on
 
-    if on:
-        if packet_text == "move_left()":
-            move_left()
-            drop_delay = base_drop_delay
+        elif packet_text == "reset()":
+            game_over_screen()
+            time.sleep(1)
+            return
 
-        elif packet_text == "move_right()":
-            move_right()
-            drop_delay = base_drop_delay
+        if on:
+            if packet_text == "move_left()":
+                move_left()
+                drop_delay = base_drop_delay
 
-        elif packet_text == "soft_drop()":
-            drop_delay = base_drop_delay/4
+            elif packet_text == "move_right()":
+                move_right()
+                drop_delay = base_drop_delay
 
-        elif packet_text == "hard_drop()":
-            hard_drop()
-            drop_delay = base_drop_delay
+            elif packet_text == "soft_drop()":
+                drop_delay = base_drop_delay/4
 
-        elif packet_text == "rotation()":
-            rotate()
-            drop_delay = base_drop_delay
+            elif packet_text == "hard_drop()":
+                hard_drop()
+                drop_delay = base_drop_delay
 
-        if time.monotonic() > last_move_time + drop_delay:
-            print(drop_delay)
-            last_move_time = time.monotonic()
-            move(1, 0)
+            elif packet_text == "rotation()":
+                rotate()
+                drop_delay = base_drop_delay
 
-game_over_screen()
+            if time.monotonic() > last_move_time + drop_delay:
+                print(drop_delay)
+                last_move_time = time.monotonic()
+                move(1, 0)
 
-time.sleep(10)
+    game_over_screen()
 
-print('game over!')
+    time.sleep(100)
+
+    print('game over!')
+
+
+while True:
+    run_game()
+
+print('end of execution')
