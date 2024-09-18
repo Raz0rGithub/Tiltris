@@ -23,9 +23,9 @@ cs = digitalio.DigitalInOut(board.SD_CS)
 reset = digitalio.DigitalInOut(board.D4)
 rfm9x = adafruit_rfm9x.RFM9x(spi=spi, cs=cs, reset=reset, frequency=915.0, baudrate=1000000)
 
-GRID_WIDTH = 14
-GRID_HEIGHT = 22
-BLOCK_SIZE = 20
+GRID_WIDTH = 12
+GRID_HEIGHT = 20
+BLOCK_SIZE = 23
 
 
 COLORS = [
@@ -95,9 +95,9 @@ main_group.append(left_border)
 
 # Rect 2 (Right)
 right_border = Rect(
-    GRID_WIDTH * BLOCK_SIZE + 20,  # x pos
+    (GRID_WIDTH + 1) * BLOCK_SIZE - 3,  # x pos
     0,  # y pos
-    BLOCK_SIZE,  # w
+    BLOCK_SIZE + 3,  # w
     GRID_HEIGHT * BLOCK_SIZE,  # h
     fill=0xF4C2C2  # baby pink
 )
@@ -107,7 +107,7 @@ main_group.append(right_border)
 bottom_border = Rect(
     0,  # x pos
     GRID_HEIGHT * BLOCK_SIZE,  # y pos
-    GRID_WIDTH * BLOCK_SIZE + 40,  # w
+    (GRID_WIDTH + 2 ) * BLOCK_SIZE,  # w
     BLOCK_SIZE,  # h
     fill=0xF4C2C2  # baby pink
 )
@@ -138,7 +138,7 @@ def start_flashing():
         right_border,  # Right border
         bottom_border   # Bottom border
     ]
-    
+
     # Flash borders 5 times
     for _ in range(5):
         for rect in border_rects:
@@ -146,7 +146,7 @@ def start_flashing():
             rect.fill = 0x808080 # Gray
         display.refresh()
         time.sleep(0.1)
-        
+
         # Set borders back to OG color
         for rect in border_rects:
             rect.fill = 0xF4C2C2
@@ -187,7 +187,7 @@ def get_tetromino_coords():
 def apply_tetromino():
     # Add tetromino to tetris board and check for line elims
     global score, total_lines_eliminated, level, grid, tetromino_color, score
-    
+
     for (row, col) in get_tetromino_coords():
         grid[row][col].fill = tetromino_color
     time.sleep(1)
@@ -202,8 +202,6 @@ def apply_tetromino():
                 n_filled_tiles += 1
         if n_filled_tiles == GRID_WIDTH:
             cleared_rows.append(row)
-
-    print(cleared_rows)
 
     # need to shift down above rows
     if cleared_rows:
@@ -343,16 +341,16 @@ while not game_over:
     if time.monotonic() > last_move_time + drop_delay:
         last_move_time = time.monotonic()
         move(1, 0)
-        
+
     if packet_text == "move_left()":
         move_left()
-        
+
     elif packet_text == "move_right()":
         move_right()
-        
+
     elif packet_text == "drop()":
         drop()
-        
+
     elif packet_text == "rotation()":
         rotate()
 
