@@ -15,4 +15,4 @@ Variations:
 
 To do Thursday/Friday:
 
-- Featherwing everything if we want
+- Build individual devices
