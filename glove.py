@@ -100,7 +100,7 @@ while start is False:
             start = True
 
 # MAIN EXECUTE LOOP
-dT = 0.0166  # Clock Speed: 16.6ms / 60 hz / 60 times a second
+dT = 0.0083  # Clock Speed: 8.3ms / 120 hz / 120 times a second
 cooldown = 0
 position = 7
 tilt_cooldown = 0
@@ -114,7 +114,7 @@ while True:
     if switch1.fell:
         S1Timer = 0
     if switch1.rose:
-        if S1Timer > 60:
+        if S1Timer > 120:
             button_1_long_press()
         else:
             button_1_short_press()
@@ -134,7 +134,7 @@ while True:
         if switch2.fell:
             S2Timer = 0
         if switch2.rose:
-            if S2Timer > 60:
+            if S2Timer > 120:
                 button_2_long_press()
             else:
                 button_2_short_press()
@@ -158,9 +158,9 @@ while True:
                     position = 15
 
                 if ax < -2.0:
-                    cooldown = 8
-                else:
                     cooldown = 16
+                else:
+                    cooldown = 32
 
             if ax > 1.0:
                 print("move_left()")
@@ -169,9 +169,9 @@ while True:
                 if position < 0:
                     position = 0
                 if ax > 2.0:
-                    cooldown = 8
-                else:
                     cooldown = 16
+                else:
+                    cooldown = 32
 
         if tilt_cooldown < 0:
             if ay > 2.5:
@@ -182,18 +182,18 @@ while True:
                     rotation = 0
 
                 if ay > 4:
-                    tilt_cooldown = 20
-                else:
                     tilt_cooldown = 40
+                else:
+                    tilt_cooldown = 100
 
             if ay < -6.0:
                 print("hard_drop()")
                 rfm9x.send('hard_drop()')
-                tilt_cooldown = 30
+                tilt_cooldown = 120
 
-            elif ay < -3.0:
+            elif ay < -4.0:
                 print("soft_drop()")
                 rfm9x.send('soft_drop()')
-                tilt_cooldown = 5
+                tilt_cooldown = 10
 
     time.sleep(dT)
