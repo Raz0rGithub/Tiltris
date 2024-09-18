@@ -140,8 +140,8 @@ while True:
                 button_2_short_press()
 
         x_tilt = (
-            abs(ay) > 1.25
-            or abs(az) > 1.25
+            abs(ay) > 1.5
+            or abs(az) > 1.5
             or abs(gz) > 0.5
             or abs(gy) > 0.5
             or abs(gx) > 0.5
@@ -175,9 +175,14 @@ while True:
                     rotation = 0
                 tilt_cooldown = 10
 
-            if ay < -3.0:
-                print("drop()")
-                rfm9x.send('drop()')
+            if ay < -5.0:
+                print("hard_drop()")
+                rfm9x.send('hard_drop()')
+                tilt_cooldown = 10
+
+            elif ay < -3.0:
+                print("soft_drop()")
+                rfm9x.send('soft_drop()')
                 tilt_cooldown = 10
 
         output = ""

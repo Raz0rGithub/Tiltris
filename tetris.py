@@ -21,7 +21,8 @@ main_group = displayio.Group()
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 cs = digitalio.DigitalInOut(board.SD_CS)
 reset = digitalio.DigitalInOut(board.D4)
-rfm9x = adafruit_rfm9x.RFM9x(spi=spi, cs=cs, reset=reset, frequency=915.0, baudrate=1000000)
+rfm9x = adafruit_rfm9x.RFM9x(
+    spi=spi, cs=cs, reset=reset, frequency=915.0, baudrate=1000000)
 
 GRID_WIDTH = 12
 GRID_HEIGHT = 20
@@ -107,7 +108,7 @@ main_group.append(right_border)
 bottom_border = Rect(
     0,  # x pos
     GRID_HEIGHT * BLOCK_SIZE,  # y pos
-    (GRID_WIDTH + 2 ) * BLOCK_SIZE,  # w
+    (GRID_WIDTH + 2) * BLOCK_SIZE,  # w
     BLOCK_SIZE,  # h
     fill=0xF4C2C2  # baby pink
 )
@@ -142,8 +143,8 @@ def start_flashing():
     # Flash borders 5 times
     for _ in range(5):
         for rect in border_rects:
-            rect.fill = 0xFFFFFF # White
-            rect.fill = 0x808080 # Gray
+            rect.fill = 0xFFFFFF  # White
+            rect.fill = 0x808080  # Gray
         display.refresh()
         time.sleep(0.1)
 
@@ -246,7 +247,11 @@ def move_left():
     move(0, -1)
 
 
-def drop():
+def soft_drop():
+    move(1, 0)
+
+
+def hard_drop():
     global game_over, tetromino_offset
     clear_tetromino()
     not_applied = True
@@ -321,6 +326,7 @@ def rotate():
 
 # ---- Application ----
 
+
 for row in range(19, GRID_HEIGHT):
     for col in range(GRID_WIDTH):
         if col != 8 and col != 9:
@@ -348,11 +354,15 @@ while not game_over:
     elif packet_text == "move_right()":
         move_right()
 
-    elif packet_text == "drop()":
-        drop()
+    elif packet_text == "soft_drop()":
+        soft_drop()
+
+    elif packet_text == "hard_drop()":
+        hard_drop()
 
     elif packet_text == "rotation()":
         rotate()
+
 
 def game_over_screen():
     for row in range(GRID_HEIGHT):
