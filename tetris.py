@@ -126,10 +126,10 @@ def update_score(new_score):
 
 
 def update_level(new_level):
-    global level, drop_delay
+    global level, base_drop_delay
     level = new_level
     level_text.text = f'Level: {level}'
-    drop_delay = 0.5 * pow(0.75, level - 1)
+    base_drop_delay = 0.5 * pow(0.75, level - 1)
     start_flashing()
 
 
@@ -162,6 +162,7 @@ def update_block_color(row, col, color_index):
 
 score = 0
 level = 1
+base_drop_delay = 0.5
 drop_delay = 0.5
 total_lines_eliminated = 0
 game_over = False
@@ -247,8 +248,8 @@ def move_left():
     move(0, -1)
 
 
-def soft_drop():
-    move(1, 0)
+# def soft_drop():
+    # Empty
 
 
 def hard_drop():
@@ -347,21 +348,26 @@ while not game_over:
     if time.monotonic() > last_move_time + drop_delay:
         last_move_time = time.monotonic()
         move(1, 0)
+        drop_delay = base_drop_delay
 
     if packet_text == "move_left()":
         move_left()
+        drop_delay = base_drop_delay
 
     elif packet_text == "move_right()":
         move_right()
+        drop_delay = base_drop_delay
 
     elif packet_text == "soft_drop()":
-        soft_drop()
+        drop_delay = base_drop_delay/2
 
     elif packet_text == "hard_drop()":
         hard_drop()
+        drop_delay = base_drop_delay
 
     elif packet_text == "rotation()":
         rotate()
+        drop_delay = base_drop_delay
 
 
 def game_over_screen():
