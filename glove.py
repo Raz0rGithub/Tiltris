@@ -44,19 +44,19 @@ switch2 = Debouncer(pin2)
 
 
 def button_1_short_press():
-    print("on_off()")
+    # print("on_off()")
     rfm9x.send('on_off()')
     global on
     on = not on
 
 
 def button_1_long_press():
-    print("reset()")
+    # print("reset()")
     rfm9x.send('reset()')
 
 
 def button_2_short_press():
-    print("start()")
+    # print("start()")
     rfm9x.send('start()')
 
 
@@ -70,34 +70,18 @@ def button_2_long_press():
     gx_bias = gyro[0]
     gy_bias = gyro[1]
     gz_bias = gyro[2]
-    print("Bias Calculated.")
-    print(
-        "Acceleration Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(
-            ax_bias, ay_bias, az_bias
-        )
-    )
-    print(
-        "Gyro Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(
-            gx_bias, gy_bias, gz_bias
-        )
-    )
+    # print("Bias Calculated.")
+    # print(
+    #     "Acceleration Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(
+    #         ax_bias, ay_bias, az_bias
+    #     )
+    # )
+    # print(
+    #     "Gyro Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(
+    #         gx_bias, gy_bias, gz_bias
+    #     )
+    # )
 
-
-# BIAS CACLULATION
-print()
-print("Calculating Bias")
-print("Center the position and tilt of your glove")
-print("Hit Start once ready")
-start = False
-while start is False:
-    switch1.update()
-    if switch1.fell:
-        button_1_short_press()
-    if on:
-        switch2.update()
-        if switch2.fell:
-            button_2_long_press()
-            start = True
 
 # MAIN EXECUTE LOOP
 dT = 0.0083  # Clock Speed: 8.3ms / 120 hz / 120 times a second
@@ -114,7 +98,7 @@ while True:
     if switch1.fell:
         S1Timer = 0
     if switch1.rose:
-        if S1Timer > 120:
+        if S1Timer > 90:
             button_1_long_press()
         else:
             button_1_short_press()
@@ -134,65 +118,65 @@ while True:
         if switch2.fell:
             S2Timer = 0
         if switch2.rose:
-            if S2Timer > 120:
+            if S2Timer > 90:
                 button_2_long_press()
             else:
                 button_2_short_press()
 
         x_tilt = (
-            abs(ay) > 1.5
-            or abs(az) > 1.5
-            or abs(gz) > 0.5
-            or abs(gy) > 0.5
-            or abs(gx) > 0.5
+            abs(ay) > 6.0
+            or abs(az) > 6.0
+            or abs(gz) > 1.5
+            or abs(gy) > 1.5
+            or abs(gx) > 1.5
         )
         cooldown -= 1
         tilt_cooldown -= 1
 
         if not x_tilt and cooldown < 0:
-            if ax < -1.0:
-                print("move_right()")
-                rfm9x.send('move_right()')
+            if ax < -2.5:
+                # print("move_left()")
+                rfm9x.send('move_left()')
                 position += 1
                 if position > 15:
                     position = 15
 
-                if ax < -2.0:
-                    cooldown = 16
+                if ax < -4.5:
+                    cooldown = 15
                 else:
-                    cooldown = 32
+                    cooldown = 60
 
-            if ax > 1.0:
-                print("move_left()")
-                rfm9x.send('move_left()')
+            if ax > 2.5:
+                # print("move_right()")
+                rfm9x.send('move_right()')
                 position -= 1
                 if position < 0:
                     position = 0
-                if ax > 2.0:
-                    cooldown = 16
+                if ax > 4.5:
+                    cooldown = 15
                 else:
-                    cooldown = 32
+                    cooldown = 60
 
         if tilt_cooldown < 0:
-            if ay > 2.5:
-                print("rotation()")
+            if ay > 5.0:
+                # print("rotation()")
                 rfm9x.send('rotation()')
                 rotation += 1
                 if rotation > 3:
                     rotation = 0
 
-                if ay > 4:
-                    tilt_cooldown = 40
+                if ay > 8.0:
+                    tilt_cooldown = 30
                 else:
-                    tilt_cooldown = 100
+                    tilt_cooldown = 80
 
             if ay < -6.0:
-                print("hard_drop()")
+                # print("hard_drop()")
                 rfm9x.send('hard_drop()')
                 tilt_cooldown = 120
 
             elif ay < -4.0:
-                print("soft_drop()")
+                # print("soft_drop()")
                 rfm9x.send('soft_drop()')
                 tilt_cooldown = 10
 
