@@ -1,1 +1,1 @@
-# Arm movement-controlled tetris!
+# Arm movement-controlled Tetris!
