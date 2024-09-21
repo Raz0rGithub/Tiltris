@@ -11,18 +11,16 @@ from adafruit_debouncer import Debouncer
 import adafruit_rfm9x
 import busio
 
-# pyportal = PyPortal()
-
-display = board.DISPLAY
-display.rotation = 90
-main_group = displayio.Group()
-
-# LORA
+# LORA connection to glove
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 cs = digitalio.DigitalInOut(board.SD_CS)
 reset = digitalio.DigitalInOut(board.D4)
 rfm9x = adafruit_rfm9x.RFM9x(
     spi=spi, cs=cs, reset=reset, frequency=915.0, baudrate=1000000)
+
+display = board.DISPLAY
+display.rotation = 90
+main_group = displayio.Group()
 
 GRID_WIDTH = 12
 GRID_HEIGHT = 20
@@ -93,7 +91,7 @@ level_text = label.Label(
     y=GRID_HEIGHT * BLOCK_SIZE + 10
 )
 
-# Rect 1 (Left)
+# Create game borders
 left_border = Rect(
     0,  # x pos
     0,  # y pos
@@ -103,7 +101,6 @@ left_border = Rect(
 )
 main_group.append(left_border)
 
-# Rect 2 (Right)
 right_border = Rect(
     (GRID_WIDTH + 1) * BLOCK_SIZE - 3,  # x pos
     0,  # y pos
@@ -113,7 +110,6 @@ right_border = Rect(
 )
 main_group.append(right_border)
 
-# Rect 3 (Bottom)
 bottom_border = Rect(
     0,  # x pos
     GRID_HEIGHT * BLOCK_SIZE,  # y pos
@@ -142,14 +138,14 @@ def update_level(new_level):
     start_flashing()
 
 
+# Flash border 5 times at each new level
 def start_flashing():
     border_rects = [
-        left_border,  # Left border
-        right_border,  # Right border
-        bottom_border   # Bottom border
+        left_border,
+        right_border,
+        bottom_border
     ]
 
-    # Flash borders 5 times
     for _ in range(5):
         for rect in border_rects:
             rect.fill = 0xFFFFFF  # White
@@ -157,18 +153,13 @@ def start_flashing():
         display.refresh()
         time.sleep(0.1)
 
-        # Set borders back to OG color
         for rect in border_rects:
             rect.fill = 0xF4C2C2
         display.refresh()
         time.sleep(0.1)
 
 
-# Update color of a block at row, col
-def update_block_color(row, col, color_index):
-    grid[row][col].fill = COLORS[color_index]
-
-
+# Randomize next tetromino and place at starting point (top middle)
 def reset_tetromino():
     global tetromino, tetromino_color, tetromino_offset, game_over
     tetromino = random.choice(TETROMINOS)[:]
@@ -179,20 +170,20 @@ def reset_tetromino():
                     for (row, col) in get_tetromino_coords())
 
 
+# Return coords of current tetromino as a list
 def get_tetromino_coords():
-    # Return coords of current tetromino as a list
     return [(row + tetromino_offset[0], col + tetromino_offset[1] + 1) for (row, col) in tetromino]
 
 
+# Add tetromino to tetris board and check for line eliminations
 def apply_tetromino():
-    # Add tetromino to tetris board and check for line elims
     global score, total_lines_eliminated, level, grid, tetromino_color, score
 
     for (row, col) in get_tetromino_coords():
         grid[row][col].fill = tetromino_color
     time.sleep(1)
 
-    # If any row is full, eliminate
+    # Add full rows to array
     cleared_rows = []
     for row in range(len(grid)):
         n_filled_tiles = 0
@@ -203,7 +194,7 @@ def apply_tetromino():
         if n_filled_tiles == GRID_WIDTH:
             cleared_rows.append(row)
 
-    # need to shift down above rows
+    # Update board accordingly
     if cleared_rows:
         for row_to_clear in cleared_rows:
             # Shift down all rows above cleared row by one
@@ -228,10 +219,12 @@ def apply_tetromino():
     reset_tetromino()
 
 
+# Check if a given cell is free
 def is_cell_free(row, col):
     return row < GRID_HEIGHT and 0 <= col < GRID_WIDTH and (row < 0 or grid[row][col].fill == 0)
 
 
+# Set all the squares of the current tetromino to black
 def clear_tetromino():
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
@@ -246,10 +239,7 @@ def move_left():
     move(0, -1)
 
 
-# def soft_drop():
-    # Empty
-
-
+# Drop block directly down
 def hard_drop():
     global game_over, tetromino_offset
     clear_tetromino()
@@ -257,42 +247,46 @@ def hard_drop():
 
     while not_applied:
 
-        # If right below is free, update offset
+        # If area right below is free, update offset
         if all(is_cell_free(row + 1, col) for (row, col) in get_tetromino_coords()):
             tetromino_offset = [tetromino_offset[0] + 1, tetromino_offset[1]]
-        # If not free, apply directly
+        # If not free, secure the block in its current spot
         else:
             game_over = any(row < 0 for (row, col) in get_tetromino_coords())
             if not game_over:
                 apply_tetromino()
                 not_applied = False
 
+    # Fill in squares at new position
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
 
+# Move a given tetromino according to d_row and d_col, representing changes in x and y values
 def move(d_row, d_col):
     global game_over, tetromino_offset
 
     # Clear prev position
     clear_tetromino()
 
-    # If free, move
+    # If area right below is free, update offset
     if all(is_cell_free(row + d_row, col + d_col) for (row, col) in get_tetromino_coords()):
         tetromino_offset = [tetromino_offset[0] +
                             d_row, tetromino_offset[1] + d_col]
+    # If not free, secure the block in its current spot
     elif d_row == 1 and d_col == 0:
         game_over = any(row < 0 for (row, col) in get_tetromino_coords())
         if not game_over:
             apply_tetromino()
 
-    # Update the tetromino at the new position
+    # Fill in squares at new position
     for (row, col) in get_tetromino_coords():
         if 0 <= row < GRID_HEIGHT and 0 <= col < GRID_WIDTH:
             grid[row][col].fill = tetromino_color
 
 
+# Rotate a given tetromino 90 degrees clockwise, translating it under out-of-bounds cases
 def rotate():
     global game_over, tetromino, tetromino_offset
     if game_over:
@@ -301,19 +295,27 @@ def rotate():
 
     ys = [row for (row, col) in tetromino]
     xs = [col for (row, col) in tetromino]
+
+    # Calculate size of tetromino's bounding box
     size = max(max(ys) - min(ys), max(xs) - min(xs))
+
+    # Rotate tetromino 90 degrees clockwise
     rotated_tetromino = [(col, size - row) for (row, col) in tetromino]
+
+    # Calculate coords of rotated tetromino based on offset
     wallkick_offset = tetromino_offset[:]
     tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1])
                        for (row, col) in rotated_tetromino]
 
+    # Handle OOB cases
     min_x = min(col for row, col in tetromino_coord)
     max_x = max(col for row, col in tetromino_coord)
     max_y = max(row for row, col in tetromino_coord)
-    wallkick_offset[1] -= min(0, min_x)
-    wallkick_offset[1] += min(0, GRID_WIDTH - (2 + max_x))
-    wallkick_offset[0] += min(0, GRID_HEIGHT - (1 + max_y))
+    wallkick_offset[1] -= min(0, min_x)                         # Prevent left OOB
+    wallkick_offset[1] += min(0, GRID_WIDTH - (2 + max_x))      # Prevent right OOB
+    wallkick_offset[0] += min(0, GRID_HEIGHT - (1 + max_y))     # Prevent bottom OOB
 
+    # Recalculate coords after wall kicks
     tetromino_coord = [(row + wallkick_offset[0], col + wallkick_offset[1])
                        for (row, col) in rotated_tetromino]
     if all(is_cell_free(row, col) for (row, col) in tetromino_coord):
@@ -327,34 +329,30 @@ def rotate():
 def game_over_screen():
     for row in range(GRID_HEIGHT):
         for col in range(GRID_WIDTH):
-            # Make the screen all black
             grid[row][col].fill = 0x000000
 
-    # Show "Game Over!" message
     game_over_text = label.Label(
         terminalio.FONT,
         text='Game Over!',
-        color=0xFF0000,  # Red
+        color=0xFF0000,
         x=(GRID_WIDTH * BLOCK_SIZE - 15) // 2,
         y=(GRID_HEIGHT * BLOCK_SIZE) // 2
     )
     main_group.append(game_over_text)
 
-    # Show final score
     final_score_text = label.Label(
         terminalio.FONT,
         text=f'Final Score: {score}',
-        color=0xFFFFFF,  # Red
+        color=0xFFFFFF,
         x=(GRID_WIDTH * BLOCK_SIZE - 50) // 2,
         y=(GRID_HEIGHT * BLOCK_SIZE) // 2 + 20
     )
     main_group.append(final_score_text)
 
-    # Show final level
     final_level_text = label.Label(
         terminalio.FONT,
         text=f'Final Level: {level}',
-        color=0xFFFFFF,  # Red
+        color=0xFFFFFF,
         x=(GRID_WIDTH * BLOCK_SIZE - 50) // 2,
         y=(GRID_HEIGHT * BLOCK_SIZE) // 2 + 40
     )
@@ -370,11 +368,11 @@ for row in range(19, GRID_HEIGHT):
 
 reset_tetromino()
 last_move_time = time.monotonic()
-# pyportal.peripherals.play_file("Tetris.wav", wait_to_finish=False)
 print("listening...")
 on = True
 
 while not game_over:
+    # Attempt to receive a packet from the remote controller, with a 0.4 sec timeout
     packet = rfm9x.receive(timeout=0.4)
     packet_text = ""
     if not packet is None:
@@ -383,11 +381,6 @@ while not game_over:
 
     if packet_text == "on_off()":
         on = not on
-
-    # elif packet_text == "reset()":
-#         game_over_screen()
-#         time.sleep(1)
-#         return
 
     if on:
         if packet_text == "move_left()":
@@ -399,7 +392,7 @@ while not game_over:
             drop_delay = base_drop_delay
 
         elif packet_text == "soft_drop()":
-            drop_delay = base_drop_delay/4
+            drop_delay = base_drop_delay / 4
 
         elif packet_text == "hard_drop()":
             hard_drop()
@@ -417,5 +410,3 @@ while not game_over:
 game_over_screen()
 
 time.sleep(100)
-
-print('game over!')

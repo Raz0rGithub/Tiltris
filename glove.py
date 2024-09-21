@@ -44,19 +44,16 @@ switch2 = Debouncer(pin2)
 
 
 def button_1_short_press():
-    # print("on_off()")
     rfm9x.send('on_off()')
     global on
     on = not on
 
 
 def button_1_long_press():
-    # print("reset()")
     rfm9x.send('reset()')
 
 
 def button_2_short_press():
-    # print("start()")
     rfm9x.send('start()')
 
 
@@ -70,17 +67,6 @@ def button_2_long_press():
     gx_bias = gyro[0]
     gy_bias = gyro[1]
     gz_bias = gyro[2]
-    # print("Bias Calculated.")
-    # print(
-    #     "Acceleration Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(
-    #         ax_bias, ay_bias, az_bias
-    #     )
-    # )
-    # print(
-    #     "Gyro Bias: X:{0:7.2f}, Y:{1:7.2f}, Z:{2:7.2f} m/s^2".format(
-    #         gx_bias, gy_bias, gz_bias
-    #     )
-    # )
 
 
 # MAIN EXECUTE LOOP
@@ -92,7 +78,6 @@ rotation = 0
 S1Timer = 0
 S2Timer = 0
 while True:
-    # Update
     switch1.update()
     S1Timer += 1
     if switch1.fell:
@@ -135,7 +120,6 @@ while True:
 
         if not x_tilt and cooldown < 0:
             if ax < -2.5:
-                # print("move_left()")
                 rfm9x.send('move_left()')
                 position += 1
                 if position > 15:
@@ -147,7 +131,6 @@ while True:
                     cooldown = 60
 
             if ax > 2.5:
-                # print("move_right()")
                 rfm9x.send('move_right()')
                 position -= 1
                 if position < 0:
@@ -159,7 +142,6 @@ while True:
 
         if tilt_cooldown < 0:
             if ay > 5.0:
-                # print("rotation()")
                 rfm9x.send('rotation()')
                 rotation += 1
                 if rotation > 3:
@@ -171,12 +153,10 @@ while True:
                     tilt_cooldown = 80
 
             if ay < -6.0:
-                # print("hard_drop()")
                 rfm9x.send('hard_drop()')
                 tilt_cooldown = 120
 
             elif ay < -4.0:
-                # print("soft_drop()")
                 rfm9x.send('soft_drop()')
                 tilt_cooldown = 10
 
