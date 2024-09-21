@@ -1,1 +1,1 @@
-# yay arm-controlled tetris!
+# Arm-controlled tetris!
